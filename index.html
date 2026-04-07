@@ -6,10 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SRG Global — Covalent Shutdown Workforce Dashboard</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23C8102E'/><text x='16' y='23' font-size='20' font-weight='bold' text-anchor='middle' fill='white'>S</text></svg>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.7.3/Recharts.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.16/Recharts.js"></script>
+<script>
+// Show errors visibly instead of blank page
+window.addEventListener('error', function(e) {
+  document.getElementById('root').innerHTML = '<div style="padding:40px;font-family:monospace;background:#FEE;color:#900;border:2px solid #C00;margin:20px;border-radius:8px;"><h2>Script Error</h2><p><strong>Message:</strong> ' + (e.message || 'Unknown') + '</p><p><strong>Source:</strong> ' + (e.filename || 'inline') + '</p><p><strong>Line:</strong> ' + (e.lineno || '?') + '</p><p>Loaded: React=' + (typeof React) + ', ReactDOM=' + (typeof ReactDOM) + ', Recharts=' + (typeof Recharts) + ', Babel=' + (typeof Babel) + '</p></div>';
+});
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F1F5F9;color:#1B2A4A}
@@ -20,7 +26,7 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F1F5F
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
+<script>
 const {useState,useMemo}=React;
 const {BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,PieChart,Pie,Cell,ResponsiveContainer,Legend}=Recharts;
 
