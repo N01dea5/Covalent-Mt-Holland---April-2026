@@ -43,9 +43,7 @@
     ::-webkit-scrollbar-thumb { background: #B0B0B0; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #888; }
     ::-webkit-scrollbar-track { background: #E8E8E8; }
-    button { font-family: inherit; }
-    select { font-family: inherit; }
-    table { font-family: inherit; }
+    button, select, table { font-family: inherit; }
   </style>
 </head>
 <body>
@@ -280,6 +278,28 @@
         { name: "Night Shift", value: E.filter(e => e.shift === "Night").length }
       ];
 
+      const tradeSummary = useMemo(() => {
+        return GROUP_ORDER.filter(g => E.some(e => e.group === g) || (CONTINGENCY.byGroup[g] || 0) > 0).map(g => {
+          const planned = E.filter(e => e.group === g).length;
+          const confirmed = E.filter(e => e.group === g && !e.name.startsWith("TBC")).length;
+          const gap = E.filter(e => e.group === g && e.name.startsWith("TBC")).length;
+          const contingency = CONTINGENCY.byGroup[g] || 0;
+
+          let readiness = "Covered";
+          let readinessColor = RM;
+
+          if (gap > 0) {
+            readiness = "Gap";
+            readinessColor = RH;
+          } else if (contingency > 0) {
+            readiness = "Ready";
+            readinessColor = RL;
+          }
+
+          return { group: g, planned, confirmed, gap, contingency, readiness, readinessColor };
+        });
+      }, []);
+
       const risks = useMemo(() => {
         const r = [];
         groups.forEach(g => {
@@ -366,6 +386,20 @@
           }
         }, level);
 
+      const ReadinessPill = ({ text, color }) =>
+        React.createElement("span", {
+          style: {
+            display: "inline-block",
+            padding: "3px 10px",
+            fontSize: 10,
+            fontWeight: 700,
+            color: "white",
+            background: color,
+            letterSpacing: 0.4,
+            textTransform: "uppercase"
+          }
+        }, text);
+
       const TabBtn = ({ id, label }) =>
         React.createElement("button", {
           onClick: () => setTab(id),
@@ -431,7 +465,7 @@
               }, "Covalent Lithium — Workforce Dashboard"),
               React.createElement("div", {
                 style: { fontSize: 12, color: SRG_GREY, marginTop: 2 }
-              }, `Mt Holland · April–May 2026 · ${E.length} Positions`)
+              }, `Mt Holland · April–May 2026 · ${E.length} Positions · Updated ${new Date().toLocaleDateString("en-AU")}`)
             )
           ),
           React.createElement("div", {
@@ -457,16 +491,52 @@
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
             },
-              React.createElement(SC, { label: "Total Positions", value: E.length, sub: `${tN} confirmed · ${tT} TBC` }),
+              React.createElement(SC, { label: "Planned Workforce", value: E.length, sub: "Core planned positions" }),
+              React.createElement(SC, { label: "Confirmed Workforce", value: tN, sub: "Named personnel only" }),
+              React.createElement(SC, { label: "Open Positions", value: tT, sub: "Still to be confirmed" }),
+              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: "Separate backup workforce" }),
               React.createElement(SC, { label: "Avg Trade Experience", value: `${aT} yrs`, sub: "Named personnel only" }),
-              React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" }),
-              React.createElement(SC, { label: "Fulfilment Rate", value: `${Math.round(tN / E.length * 100)}%`, sub: `${tT} positions to fill` }),
-              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: "Shown separately from planned workforce" })
+              React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" })
             ),
 
             React.createElement("div", {
               style: { marginTop: -8, marginBottom: 24, fontSize: 11, color: SRG_GREY, fontStyle: "italic" }
             }, "Contingency is shown separately in headcount summary and trade-group manning only. It is excluded from planned workforce, fulfilment and risk calculations."),
+
+            React.createElement("div", {
+              style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "auto", marginBottom: 24 }
+            },
+              React.createElement("div", {
+                style: { padding: "18px 24px", borderBottom: `2px solid ${SRG_RED}`, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: SRG_DARK }
+              }, "By-Trade Workforce Summary"),
+              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 12 } },
+                React.createElement("thead", null,
+                  React.createElement("tr", { style: { background: "#FAFAFA", borderBottom: `1px solid ${SRG_BORDER}` } },
+                    React.createElement("th", { style: { padding: "12px", textAlign: "left", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Trade Group"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "center", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Planned"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "center", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Confirmed"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "center", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Gap"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "center", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Contingency"),
+                    React.createElement("th", { style: { padding: "12px", textAlign: "left", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Readiness")
+                  )
+                ),
+                React.createElement("tbody", null,
+                  tradeSummary.map((r, i) =>
+                    React.createElement("tr", {
+                      key: r.group,
+                      style: { borderBottom: `1px solid ${SRG_BORDER}`, background: i % 2 === 0 ? "white" : "#FAFAFA" }
+                    },
+                      React.createElement("td", { style: { padding: "10px 12px", fontWeight: 700, color: SRG_DARK } }, r.group),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700 } }, r.planned),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: SRG_DARK } }, r.confirmed),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: r.gap > 0 ? RH : SRG_DARK } }, r.gap),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: r.contingency > 0 ? SRG_DARK : "#B0B0B0" } }, r.contingency || "–"),
+                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(ReadinessPill, { text: r.readiness, color: r.readinessColor }))
+                    )
+                  )
+                )
+              )
+            ),
 
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }
