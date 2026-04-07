@@ -11,25 +11,7 @@
 
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.16/Recharts.js"></script>
-
-  <script>
-    window.addEventListener("error", function (e) {
-      var root = document.getElementById("root");
-      if (!root) return;
-      root.innerHTML =
-        '<div style="padding:40px;font-family:monospace;background:#FEE;color:#900;border:2px solid #C00;margin:20px;border-radius:8px;">' +
-        "<h2>Script Error</h2>" +
-        "<p><strong>Message:</strong> " + (e.message || "Unknown") + "</p>" +
-        "<p><strong>Source:</strong> " + (e.filename || "inline") + "</p>" +
-        "<p><strong>Line:</strong> " + (e.lineno || "?") + "</p>" +
-        "<p>Loaded: React=" + typeof React +
-        ", ReactDOM=" + typeof ReactDOM +
-        ", Recharts=" + typeof Recharts +
-        "</p></div>";
-    });
-  </script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,13 +26,19 @@
     ::-webkit-scrollbar-thumb:hover { background: #888; }
     ::-webkit-scrollbar-track { background: #E8E8E8; }
     button, select, table { font-family: inherit; }
+
+    @media print {
+      body { background: white !important; }
+      button { display: none !important; }
+      #root { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script>
-    const { useState, useMemo } = React;
+    const { useMemo, useState } = React;
     const {
       BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
       PieChart, Pie, Cell, ResponsiveContainer, Legend
@@ -65,157 +53,10 @@
     const RM = "#F59E0B";
     const RL = "#16A34A";
 
-    const CONTINGENCY = {
-      total: 29,
-      byGroup: {
-        "Leadership": 0,
-        "HSE": 0,
-        "Boilermaker": 3,
-        "Electrical": 1,
-        "Fitter": 12,
-        "Inspections": 0,
-        "Rigger": 3,
-        "Roller Crew": 4,
-        "Lube Tech": 0,
-        "Trade Assistant": 6
-      }
-    };
+    const GROUP_ORDER = ["Leadership","HSE","Boilermaker","Electrical","Fitter","Inspections","Rigger","Roller Crew","Lube Tech","Trade Assistant"];
+    const SHIFT_ORDER = ["Day", "Night"];
 
-    const E = [
-      {id:1,name:"Adam Riley",role:"Superintendent",shift:"Day",days:10,group:"Leadership",ty:15,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Experienced shutdown superintendent with extensive Kwinana industrial leadership across chemical, refinery and processing environments. Proven capability managing large multi-discipline crews through complex shutdowns."},
-      {id:2,name:"Lewis Newell",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Int",gta:false,fa:true,sum:"Mechanical supervisor with SRG Global since 2024, leading crews across Tronox, CSBP and Kleenheat shutdowns — all Major Hazard Facilities. Intermediate rigger. Currently completing Business degree. Strong emerging leader with direct Kwinana MHF experience."},
-      {id:3,name:"Peter Burns",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:30,sy:20,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Dual-trade boilermaker/sheetmetal worker with 30 years in the trade and 10+ years as mechanical supervisor. Extensive Pilbara shutdown experience across BHP, FMG, Rio Tinto. CSBP sodium cyanide plant shutdown experience. HR licence holder."},
-      {id:4,name:"TBC",role:"Supervisor DS",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Pre Shut Crew supervisor — position to be confirmed."},
-      {id:55,name:"TBC",role:"Supervisor Elec",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Electrical supervisor — position to be confirmed."},
-      {id:56,name:"Mark Sullivan",role:"Supervisor NS",shift:"Night",days:8,group:"Leadership",ty:11,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Trade-qualified mechanical fitter with 11 years experience. Shutdown supervisor and leading hand across BHP, FMG, Karara. Pump specialist background with National Pumps & Energy. Reliable nightshift leader."},
-      {id:57,name:"Jordan Kirkby",role:"Supervisor NS",shift:"Night",days:6,group:"Leadership",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Night shift supervisor — resume to be provided. Experience details to be confirmed with operations."},
-      {id:58,name:"TBC",role:"Supervisor NS",shift:"Night",days:6,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Night shift supervisor — position to be confirmed."},
-      {id:31,name:"TBC",role:"Coordinator",shift:"Night",days:8,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Night coordinator for plant run-up — position to be confirmed."},
-      {id:26,name:"Jacinta Jeffery",role:"HSE",shift:"Day",days:9,group:"HSE",ty:5,sy:5,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"HSE advisor with strong shutdown experience across Kwinana industrial sites. References from BHP, Programmed and SRG Global. Proven in high-hazard environments."},
-      {id:27,name:"Pare Te Nahu",role:"HSE",shift:"Night",days:7,group:"HSE",ty:16,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:true,sum:"16+ year HSE advisor — currently HSE Advisor at Covalent Lithium Mt Holland. Diploma in OHS, ICAM investigator, Cert IV Training & Assessment. Tianqi Lithium Kwinana (EC&M), Roy Hill (Thiess), BHP Worsley, Sino Iron, Newmont shutdowns. Direct site knowledge and active client relationships. Exceptional credentials for the night HSE role."},
-      {id:14,name:"Ben Attack",role:"Boilermaker",shift:"Day",days:9,group:"Boilermaker",ty:12,sy:8,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"UK-qualified coded pipe welder (6G GTAW/SMAW/FCAW). Power station, refinery and petrochemical shutdown experience. Strong technical capability in pressure piping and structural steelwork."},
-      {id:15,name:"Brendan Hillman",role:"Boilermaker",shift:"Day",days:7,group:"Boilermaker",ty:13,sy:10,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:false,dog:true,rig:"",gta:false,fa:true,sum:"13-year boilermaker/welder with leading hand experience supervising crews of 10+. BHP, MinRes shutdown maintenance. Currently at Mt Holland mine site. Telehandler and dogging tickets."},
-      {id:44,name:"Arron Nairn",role:"Boilermaker",shift:"Night",days:4,group:"Boilermaker",ty:12,sy:5,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"12-year boilermaker with Talison (Greenbushes) shutdown experience — chutes, conveyors, screens, wear plates. MMAW pipe welding. Forklift ticket. Strong processing plant maintenance background."},
-      {id:45,name:"William Robinson",role:"Boilermaker",shift:"Night",days:4,group:"Boilermaker",ty:12,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"12-year boilermaker with fabrication and shutdown experience across FMG, BHP, Roy Hill, MinRes, Karara. SMAW and FCAW welding. EWP certified."},
-      {id:16,name:"Nitin Mahamuni",role:"Coded Welder",shift:"Day",days:4,group:"Boilermaker",ty:13,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"13+ year coded pipe welder — 6G TIG, FCAW, SMAW, MIG across carbon steel, stainless steel and alloy. Fabrication trade certificate. SINO Iron Ore shutdown experience. Extensive pressure piping capability."},
-      {id:22,name:"TBC",role:"Electrician",shift:"Day",days:7,group:"Electrical",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Day shift electrician — position to be confirmed."},
-      {id:23,name:"Benjamin Chopping",role:"Electrician",shift:"Day",days:7,group:"Electrical",ty:10,sy:2,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"WA A-grade electrician with 10+ years across mining, construction and commercial sectors. Civmec Paraburdoo, Mining Industrial & Electrics. Rio Tinto inducted. Commissioning and testing experience."},
-      {id:24,name:"James Mahoney",role:"Electrician",shift:"Night",days:7,group:"Electrical",ty:1,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Licensed electrician (EW205186) with Cert III Electrotechnology. Completed 4-year apprenticeship on major WA projects including Yanchep Train Line and Yagan Square. HV switching operations qualified. Currently with Team Electrical Services on industrial/commercial construction."},
-      {id:25,name:"Drew Brand",role:"Electrician",shift:"Night",days:7,group:"Electrical",ty:17,sy:4,cse:false,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Licensed electrician (EW 142637) with 17 years experience. 2 years at SRG Global Pilbara across FMG sites. Diagnostic testing, motor controls, compliance inspection. Strong industrial electrical background."},
-      {id:5,name:"Mitya Dobbelaere",role:"Fitter",shift:"Day",days:6,group:"Fitter",ty:12,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Trade-qualified mechanical fitter with fabrication certificate. 12+ years heavy mechanical — pumps, compressors, hydraulics. Strong technical aptitude across rotating equipment and mechanical systems."},
-      {id:6,name:"Malcolm Grainger-Rousseau",role:"Fitter",shift:"Day",days:6,group:"Fitter",ty:30,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Fitter and turner since 1995 — 30 years in the trade. CSBP Kwinana inducted. BHP Nickel, Monadelphous shutdowns, Karratha/Cape Preston. High-risk LF licence. One of the most experienced fitters on the crew."},
-      {id:7,name:"Russell Phillips",role:"Fitter",shift:"Day",days:9,group:"Fitter",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Post Shut Crew fitter — resume to be provided. Experience details to be confirmed with operations."},
-      {id:8,name:"Darren James",role:"Fitter",shift:"Day",days:7,group:"Fitter",ty:10,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"10 years mechanical maintenance experience specialising in hydraulic systems, mechanical fault-finding and preventative maintenance. NVQ3 mechanical manufacturing engineering. Strong diagnostic capability."},
-      {id:9,name:"Jake Gangemi",role:"Fitter",shift:"Day",days:7,group:"Fitter",ty:8,sy:5,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:true,sum:"Cert III Automotive Mechanical with 4+ years at Rio Tinto Yandicoogina as maintenance fitter. Minprovise shutdowns — crushers, conveyors, pulleys. Forklift and dogging tickets. BHP/Rio/Roy Hill inducted."},
-      {id:10,name:"Ben Friedauer",role:"Fitter",shift:"Day",days:7,group:"Fitter",ty:22,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:true,fa:true,sum:"22+ year mechanical fitter/boilermaker. 13 months at Tianqi Kwinana, Tronox Kwinana, 2 years SRG Global on Alcoa Kwinana contract. BHP Nelson Point shutdown. Basic rigging, dogging, forklift, EWP, gas testing. Exceptional Kwinana industrial knowledge."},
-      {id:11,name:"Walid Boulahdid",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Bas",gta:false,fa:false,sum:"Cert III mechanical fitter with shutdown experience across BHP, Rio, Roy Hill, FMG, South32. Conveyors, crushers, pumps, ball mill assembly. Oil and gas background. Basic rigging."},
-      {id:12,name:"Oliver Kyle",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:8,sy:2,cse:true,wah:true,ewp:false,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"8-year mechanical fitter. Karara core crew (pumps, slurry systems). Telehandler ticket. FMG/Roy Hill inducted. Strong pump and rotating equipment experience."},
-      {id:13,name:"Omkar Dorugade",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:12,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"12+ year maintenance fitter with Cert III Engineering Mechanical Trade. John Deere, Harman manufacturing. Strong preventative maintenance and precision assembly background."},
-      {id:35,name:"Herbert Mukunga",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:6,sy:5,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:true,dog:false,rig:"",gta:true,fa:true,sum:"Cert III mechanical fitter with B.Tech Mechanical (ECU). Toshiba Energy turbine specialist, UGL conveyor maintenance, Primero at FMG Cloudbreak. Full ticket set — telehandler, EWP, HR licence, gas testing. Versatile nightshift fitter with turbine and conveyor expertise."},
-      {id:36,name:"Ganesh Mohite",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:30,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"30-year veteran — 5 years at Gorgon live gas plant, offshore Prelude FLNG, BHP South Flank. GE turbine experience. Flange management, hydrostatic testing. One of the most experienced fitters on the entire crew."},
-      {id:37,name:"Jordi Patino Roca",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Mechanical fitter with intermediate rigging and dogging. Extensive Tier 1 FIFO — FMG, BHP (including Olympic Dam), Roy Hill, Karara, Iron Bridge via Monadelphous, Karridale, Warrikal. Broad site exposure."},
-      {id:38,name:"Gurshwinder Singh",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:3,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Cert III mechanical fitter with Greenbushes shutdown experience. Boddington Gold, Karara, BHP Area C, FMG Iron Bridge, Roy Hill. MC licence. Forklift and EWP tickets. Broad Tier 1 site exposure."},
-      {id:39,name:"Kulvinder Singh",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:2,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Cert III mechanical fitter. Reclaimer/stacker maintenance, gyratory crusher, apron feeders. Rio, Roy Hill, FMG, Iron Bridge, Greenbushes, PLS inducted. MC licence. Broad processing plant experience."},
-      {id:40,name:"Abdikadir Mohamed",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Cert III mechanical fitter. Linkforce (BHP), Warrikal (Engytech Karara), Insite. Conveyors, crushers, rollers, valves. BHP/Rio/FMG/Roy Hill inducted. Solid shutdown maintenance experience."},
-      {id:41,name:"Jamie Adams",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:7,sy:5,cse:true,wah:true,ewp:false,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"HV mechanical fitter with Siemens Energy — 33kV to 400kV substations. AIS/GIS installation, precision pipe fitting. Telehandler operator. Strong mechanical aptitude and technical precision."},
-      {id:42,name:"Omar Anadif",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:5,sy:2,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:true,fa:true,sum:"Cert III mechanical trade (MEM30219). 4 years Toyota Motor EU R&D. Mining experience with SMS Telfer, DIAB GoldFields, Monadelphous, DTH Kwinana. CSBP Kwinana inducted. Exceptional ticket set — forklift, EWP (under+over), telehandler, HR, gas testing. WHV 417."},
-      {id:43,name:"Clemens Schaaf",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:5,sy:1,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:false,sum:"German-trained mechatronics technician with Cert III mechanical trade. Dogging and basic rigging. Mining shutdowns with Ahrens, Innovent. EWP and forklift tickets. WHV 417."},
-      {id:59,name:"TBC",role:"Fitter - Conveyor Inspections",shift:"Day",days:5,group:"Inspections",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Conveyor inspections / skirt adjustments — position to be confirmed."},
-      {id:60,name:"Timo Gronenberg",role:"Fitter - Conveyor Inspections",shift:"Day",days:5,group:"Inspections",ty:7,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"German-qualified industrial mechanic with 7+ years across rail, military and manufacturing. Cert III mechanical fitter (AU). Rema Tip Top conveyor roller/frame shutdown experience. Strong mechanical fundamentals."},
-      {id:61,name:"Gerry Uy",role:"Fitter - Conveyor Inspections",shift:"Night",days:5,group:"Inspections",ty:4,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:true,dog:false,rig:"Int Scaff",gta:false,fa:false,sum:"Mechanical fitter with Karara, Boddington, FQM Ravensthorpe experience. Crushers, conveyors, HPGR. Intermediate scaffolding ticket. Forklift and HR licence. Strong processing plant background."},
-      {id:62,name:"Samuel Gunn",role:"Fitter - Conveyor Inspections",shift:"Night",days:5,group:"Inspections",ty:3,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"UK-trained mechanical engineer with 9 years at Bush Traction — rotating machines specialist. WWF/Karridale Karara shutdown experience. Strong conveyor, pump and bearing diagnostics capability."},
-      {id:63,name:"Amit Gund",role:"Fitter - Inspections",shift:"Day",days:5,group:"Inspections",ty:3,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:false,sum:"Cert III mechanical fitter. Komatsu, Capral Aluminium, Karara shutdown. HPGR inspection, conveyors, agitators, screens. Dogging and forklift tickets."},
-      {id:64,name:"Armand Loupias",role:"Fitter - Inspections",shift:"Night",days:5,group:"Inspections",ty:5,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"IRATA L1",gta:false,fa:false,sum:"Mechanical fitter with Canadian Malartic Mine experience — crushers, SAG/ball mills, conveyors. Roy Hill, FMG Iron Bridge, Wodgina, Gruyere shutdowns. IRATA L1 rope access. EWP ticket."},
-      {id:17,name:"Joe Dack",role:"Rigger Advanced",shift:"Day",days:9,group:"Rigger",ty:4,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int + IRATA L1",gta:false,fa:true,sum:"Intermediate rigger with IRATA L1 rope access. British Army section commander — strong leadership and communication. High-rise construction rigging (Hanssen). Dogging ticket. Reliable and disciplined."},
-      {id:18,name:"Darren Taylor",role:"Rigger Advanced",shift:"Day",days:7,group:"Rigger",ty:20,sy:13,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:true,dog:true,rig:"Adv",gta:false,fa:true,sum:"20 years at Alcoa Kwinana — advanced rigging, crane driving (25T Franna), dual lifts. Forklift, HR licence, dogging. Outstanding Kwinana industrial experience. Most experienced rigger on the crew."},
-      {id:46,name:"Ricky Truslove",role:"Rigger Advanced",shift:"Night",days:6,group:"Rigger",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Advanced scaffolder with intermediate rigging and dogging. Breight Group FIFO since 2022. EWP ticket. Consistent shutdown scaffold and rigging experience."},
-      {id:47,name:"Chaeyoon Kim",role:"Rigger Advanced",shift:"Night",days:4,group:"Rigger",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Intermediate rigger with Sino shutdown, Paddington Gold, Olympic Dam experience. Overhead crane, EWP, forklift, dogging. South Korean petrochemical shutdown background adds international perspective."},
-      {id:53,name:"Christopher McLennan",role:"Roller Crew Supervisor",shift:"Day",days:7,group:"Roller Crew",ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,sum:"Mechanical supervisor supporting roller crew leadership depth. Strong shutdown planning and supervision background across Aerison, Monadelphous and Boddington shutdown environments."},
-      {id:54,name:"Stefanos Karikis",role:"Roller Tech",shift:"Day",days:7,group:"Roller Crew",ty:3,sy:3,cse:true,wah:true,ewp:false,tele:true,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:false,sum:"Trade assistant/serviceman at Thiess FMG Iron Bridge. Logistics background (Bis Industries Murrin Murrin). Basic rigging, dogging, telehandler, forklift, overhead crane. Versatile operator."},
-      {id:551,name:"King Garcia",role:"Roller Tech",shift:"Day",days:7,group:"Roller Crew",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical trades assistant since 2021. Conveyor rollers, crushers, screens, chute liners. BHP/Rio/FMG/Roy Hill/GoldFields inducted. Forklift ticket. Broad site induction coverage."},
-      {id:561,name:"Jeremy Larock",role:"Roller Tech",shift:"Day",days:6,group:"Roller Crew",ty:3,sy:3,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Operator and trade assistant. HR licence, telehandler, EWP, forklift. Linkforce, FQM, PPA, Citic Pacific experience. Currently completing Cert III welding. Exceptional ticket set for a roller tech."},
-      {id:571,name:"Henri Martins",role:"Roller Tech",shift:"Day",days:6,group:"Roller Crew",ty:2,sy:1,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Trade assistant and roller tech. Macmahon Olympic Dam, Downer Mt Isa. BHP WAIO inducted. EWP ticket. Developing experience — will benefit from working alongside experienced roller crew."},
-      {id:50,name:"Sebastien Djaffer",role:"Lube Tech T/A",shift:"Day",days:4,group:"Lube Tech",ty:1,sy:1,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Lube tech and trade assistant. Monadelphous (Rio Cape Lambert), Madson (FMG Anderson Point), Ventia (BHP Nelson Point). EWP, forklift, telehandler HRWL. Extensive site induction coverage across Tier 1 clients."},
-      {id:51,name:"Mehdi Mokeddem",role:"Lube Tech T/A",shift:"Day",days:4,group:"Lube Tech",ty:2,sy:2,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"FIFO lube technician. TLS multi-site shutdown experience. Monadelphous, Fenner, Roy Hill, GoldFields. Automatic grease systems, SAP database, oil sampling. BHP/Rio/FMG/Roy Hill inducted."},
-      {id:52,name:"Lakshman Vasanthan",role:"Lube Tech T/A",shift:"Night",days:5,group:"Lube Tech",ty:3,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Lube tech supervisor at TLS (current). Cert III mechanical trade (RPL). Statutory supervisor and WHS mining supervisor qualified. Linkforce, Mader Group shutdown experience. Rio/FMG/BHP/Roy Hill inducted. Solid nightshift lube lead."},
-      {id:19,name:"Mehdi Bendani",role:"T.A. (Sentry)",shift:"Day",days:7,group:"Trade Assistant",ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"IRATA L1",gta:false,fa:false,sum:"Trade assistant with rigging support and IRATA L1 rope access. Collar Talent (Marvel Loch), Go2 (Sunrise Dam). LNG experience in Algeria. Capable of confined space hole watch and sentry duties."},
-      {id:20,name:"Madeline Jones",role:"T.A. (Sentry)",shift:"Day",days:10,group:"Trade Assistant",ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Trade assistant with Downer (Bayswater), CivMec (QAL), Kaefer (Rio ship unloader). Confined space hole watch experience. LF VOC confirmed per roster requirements. WHV 462."},
-      {id:48,name:"Federico Sarti",role:"T.A. (Sentry)",shift:"Night",days:4,group:"Trade Assistant",ty:12,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:false,sum:"12+ year mechanical fitter/CNC machinist (Italy). HR truck driver in Goldfields. Multiple mining site inductions completed. Cert III mechanical engineering expected April 2026. Strong mechanical knowledge base for a TA role."},
-      {id:49,name:"Lea Mondesir",role:"T.A. (Sentry)",shift:"Night",days:4,group:"Trade Assistant",ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:false,sum:"Trade assistant with SRG Global (Tronox shutdown experience). Utility roles at BHP/FMG camps. HR licence. BHP/Rio/FMG inducted. WHV holder."},
-      {id:28,name:"Ellie Jeon",role:"T.A. Telehandler",shift:"Day",days:10,group:"Trade Assistant",ty:5,sy:4,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Experienced plant operator — excavator, telehandler, loader, dump truck. Primero (KCGM, Pilbara Minerals P680 expansion). BHP MAC shutdown. HR licence. Exceptional ticket set across multiple plant types."},
-      {id:29,name:"Lewis Ferris",role:"T.A. Telehandler",shift:"Night",days:8,group:"Trade Assistant",ty:2,sy:1,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Materials logistics officer. Warrikal (FMG), Castleross experience. Telehandler and EWP HRWL. BHP/FMG/Roy Hill/Rio site inducted. Strong logistics and materials handling capability."},
-      {id:30,name:"TBC",role:"Bus Driver",shift:"Day",days:9,group:"Trade Assistant",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Bus driver — position to be confirmed."}
-    ];
-
-    const DATES = ["17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May"];
-    const DOW = ["Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon"];
-
-    const ROSTER = [
-      {name:"Ben Attack",role:"Boilermaker",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Brendan Hillman",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Arron Nairn",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"William Robinson",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"TBC",role:"Bus Driver",notes:"",codes:["","","","DIP","DS","DS","DS","DS","DS","DS","DS","DS","DS","DOP","","","",""]},
-      {name:"Nitin Mahamuni",role:"Coded Welder",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"TBC",role:"Coordinator",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"TBC",role:"Electrician",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
-      {name:"Benjamin Chopping",role:"Electrician",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
-      {name:"James Mahoney",role:"Electrician",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
-      {name:"Drew Brand",role:"Electrician",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
-      {name:"Mitya Dobbelaere",role:"Fitter",notes:"Pre Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Malcolm Grainger-Rousseau",role:"Fitter",notes:"Pre Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Russell Phillips",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Darren James",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Jake Gangemi",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Ben Friedauer",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Walid Boulahdid",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Oliver Kyle",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Omkar Dorugade",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Herbert Mukunga",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Ganesh Mohite",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Jordi Patino Roca",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Gurshwinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Kulvinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Abdikadir Mohamed",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Jamie Adams",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Omar Anadif",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Clemens Schaaf",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"TBC",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
-      {name:"Timo Gronenberg",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
-      {name:"Gerry Uy",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Samuel Gunn",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Amit Gund",role:"Fitter - Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
-      {name:"Armand Loupias",role:"Fitter - Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Jacinta Jeffery",role:"HSE",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","","",""]},
-      {name:"Pare Te Nahu",role:"HSE",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
-      {name:"Stefanos Karikis",role:"Roller Tech",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Sebastien Djaffer",role:"Lube Tech T/A",notes:"Lube Team 1 D/S Only",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Mehdi Mokeddem",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Lakshman Vasanthan",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Joe Dack",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Darren Taylor",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Ricky Truslove",role:"Rigger Advanced",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Chaeyoon Kim",role:"Rigger Advanced",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Christopher McLennan",role:"Roller Crew Supervisor",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"King Garcia",role:"Roller Tech",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Jeremy Larock",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Henri Martins",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Adam Riley",role:"Superintendent",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Lewis Newell",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Peter Burns",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"TBC",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"TBC",role:"Supervisor Elec",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
-      {name:"Mark Sullivan",role:"Supervisor NS",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Jordan Kirkby",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"TBC",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Mehdi Bendani",role:"T.A. (Sentry)",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Madeline Jones",role:"T.A. (Sentry)",notes:"Post Shut - Must have LF VOC",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Federico Sarti",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Lea Mondesir",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Ellie Jeon",role:"T.A. Telehandler",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]}
-    ];
-
-    const TC = [
+    const TICKET_META = [
       { key: "cse", label: "CSE" },
       { key: "wah", label: "WAH" },
       { key: "ewp", label: "EWP" },
@@ -228,66 +69,260 @@
       { key: "fa", label: "FA" }
     ];
 
-    const GROUP_ORDER = ["Leadership","HSE","Boilermaker","Electrical","Fitter","Inspections","Rigger","Roller Crew","Lube Tech","Trade Assistant"];
+    const TICKET_FILTERS = [
+      { key: "cse", label: "CSE" },
+      { key: "wah", label: "WAH" },
+      { key: "ewp", label: "EWP" },
+      { key: "tele", label: "Telehandler" },
+      { key: "fork", label: "Forklift" },
+      { key: "hr", label: "HR Licence" },
+      { key: "dog", label: "Dogging" },
+      { key: "rig", label: "Rigging" },
+      { key: "gta", label: "Gas Test" },
+      { key: "fa", label: "First Aid" }
+    ];
+
+    const DATES = ["17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May"];
+    const DOW = ["Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon"];
+
+    /*
+      UPDATE GUIDE
+      ------------
+      1. PEOPLE = single source of truth for names, roles, groups, tickets, experience and summaries.
+      2. ROSTER = only roster notes + codes, linked by personId.
+      3. CONTINGENCY_BY_GROUP = backup depth counts only.
+      4. Do not duplicate names or roles inside ROSTER.
+    */
+
+    const PEOPLE = [
+      {id:1,name:"Adam Riley",role:"Superintendent",group:"Leadership",shift:"Day",days:10,ty:15,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Experienced shutdown superintendent with extensive Kwinana industrial leadership across chemical, refinery and processing environments. Proven capability managing large multi-discipline crews through complex shutdowns."},
+      {id:2,name:"Lewis Newell",role:"Supervisor DS",group:"Leadership",shift:"Day",days:10,ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Int",gta:false,fa:true,status:"confirmed",summary:"Shutdown trades support / rigging-qualified crew member with fixed plant shutdown experience. Intermediate rigger with confined space, working at heights, EWP and gas testing exposure. Currently completing a Bachelor of Business."},
+      {id:3,name:"Peter Burns",role:"Supervisor DS",group:"Leadership",shift:"Day",days:10,ty:30,sy:20,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Dual-trade boilermaker / sheetmetal worker with 30 years in the trade and 10+ years as mechanical supervisor. Extensive Pilbara shutdown experience across BHP, FMG and Rio Tinto, plus CSBP sodium cyanide plant experience. HR licence holder."},
+      {id:4,name:"TBC",role:"Supervisor DS",group:"Leadership",shift:"Day",days:7,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Pre shut crew supervisor — position to be confirmed."},
+      {id:55,name:"TBC",role:"Supervisor Elec",group:"Leadership",shift:"Day",days:7,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Electrical supervisor — position to be confirmed."},
+      {id:56,name:"Mark Sullivan",role:"Supervisor NS",group:"Leadership",shift:"Night",days:8,ty:11,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Trade-qualified mechanical fitter with 11 years experience. Shutdown supervisor and leading hand across BHP, FMG and Karara. Pump specialist background with National Pumps & Energy. Reliable nightshift leader."},
+      {id:57,name:"Jordan Kirkby",role:"Supervisor NS",group:"Leadership",shift:"Night",days:6,ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Night shift supervisor — resume to be provided. Experience details to be confirmed with operations."},
+      {id:58,name:"TBC",role:"Supervisor NS",group:"Leadership",shift:"Night",days:6,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Night shift supervisor — position to be confirmed."},
+      {id:31,name:"TBC",role:"Coordinator",group:"Leadership",shift:"Night",days:8,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Night coordinator for plant run-up — position to be confirmed."},
+
+      {id:26,name:"Jacinta Jeffery",role:"HSE",group:"HSE",shift:"Day",days:9,ty:5,sy:5,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"HSE advisor with strong shutdown experience across Kwinana industrial sites. References from BHP, Programmed and SRG Global. Proven in high-hazard environments."},
+      {id:27,name:"Pare Te Nahu",role:"HSE",group:"HSE",shift:"Night",days:7,ty:16,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:true,status:"confirmed",summary:"16+ year HSE advisor currently supporting Covalent Lithium Mt Holland. Strong shutdown and major project experience across Tianqi Kwinana, Roy Hill, BHP and Sino, with direct client familiarity and strong formal HSE capability."},
+
+      {id:14,name:"Ben Attack",role:"Boilermaker",group:"Boilermaker",shift:"Day",days:9,ty:12,sy:8,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"UK-qualified coded pipe welder with petrochemical, refinery and power station shutdown experience. Strong technical capability in pressure piping and structural steelwork."},
+      {id:15,name:"Brendan Hillman",role:"Boilermaker",group:"Boilermaker",shift:"Day",days:7,ty:13,sy:10,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:false,dog:true,rig:"",gta:false,fa:true,status:"confirmed",summary:"13-year boilermaker / welder with leading hand experience supervising crews of 10+. BHP and MinRes shutdown maintenance background. Telehandler and dogging tickets."},
+      {id:44,name:"Arron Nairn",role:"Boilermaker",group:"Boilermaker",shift:"Night",days:4,ty:12,sy:5,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"12-year boilermaker with Talison shutdown experience across chutes, conveyors, screens and wear plates. Forklift ticket and strong processing plant maintenance background."},
+      {id:45,name:"William Robinson",role:"Boilermaker",group:"Boilermaker",shift:"Night",days:4,ty:12,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"12-year boilermaker with fabrication and shutdown experience across FMG, BHP, Roy Hill, MinRes and Karara. EWP certified."},
+      {id:16,name:"Nitin Mahamuni",role:"Coded Welder",group:"Boilermaker",shift:"Day",days:4,ty:13,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"13+ year coded pipe welder across carbon steel, stainless steel and alloy work. Strong pressure piping capability and shutdown exposure."},
+
+      {id:22,name:"TBC",role:"Electrician",group:"Electrical",shift:"Day",days:7,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Day shift electrician — position to be confirmed."},
+      {id:23,name:"Benjamin Chopping",role:"Electrician",group:"Electrical",shift:"Day",days:7,ty:10,sy:2,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"WA A-grade electrician with 10+ years across mining, construction and commercial sectors. Paraburdoo and Rio exposure, commissioning/testing experience and a broader ticket set than currently shown in the dashboard."},
+      {id:24,name:"James Mahoney",role:"Electrician",group:"Electrical",shift:"Night",days:7,ty:1,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Licensed electrician with Cert III Electrotechnology and apprenticeship experience on major WA projects. HV switching operations qualified."},
+      {id:25,name:"Drew Brand",role:"Electrician",group:"Electrical",shift:"Night",days:7,ty:17,sy:4,cse:false,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Licensed electrician with 17 years experience and strong industrial electrical background. Diagnostic testing, motor controls and compliance inspection capability."},
+
+      {id:5,name:"Mitya Dobbelaere",role:"Fitter",group:"Fitter",shift:"Day",days:6,ty:12,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Trade-qualified mechanical fitter with strong heavy mechanical background across pumps, compressors, hydraulics and rotating equipment."},
+      {id:6,name:"Malcolm Grainger-Rousseau",role:"Fitter",group:"Fitter",shift:"Day",days:6,ty:30,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Fitter and turner since 1995 with strong shutdown background, CSBP Kwinana induction and extensive industrial experience. One of the most experienced fitters on the crew."},
+      {id:7,name:"Russell Phillips",role:"Fitter",group:"Fitter",shift:"Day",days:9,ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Post shut crew fitter — resume to be provided. Experience details to be confirmed with operations."},
+      {id:8,name:"Darren James",role:"Fitter",group:"Fitter",shift:"Day",days:7,ty:10,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"10 years mechanical maintenance experience with strength in hydraulics, fault-finding and preventative maintenance."},
+      {id:9,name:"Jake Gangemi",role:"Fitter",group:"Fitter",shift:"Day",days:7,ty:8,sy:5,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:true,status:"confirmed",summary:"Mechanical fitter with Rio maintenance background and strong shutdown exposure across crushers, conveyors and pulleys. Forklift and dogging tickets."},
+      {id:10,name:"Ben Friedauer",role:"Fitter",group:"Fitter",shift:"Day",days:7,ty:22,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:true,fa:true,status:"confirmed",summary:"22+ year mechanical fitter / boilermaker with strong Kwinana industrial experience across Tianqi, Tronox and Alcoa Kwinana. Excellent ticket depth including gas testing."},
+      {id:11,name:"Walid Boulahdid",role:"Fitter",group:"Fitter",shift:"Day",days:4,ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Bas",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with shutdown experience across BHP, Rio, Roy Hill, FMG and South32. Basic rigging and broad processing plant exposure."},
+      {id:12,name:"Oliver Kyle",role:"Fitter",group:"Fitter",shift:"Day",days:4,ty:8,sy:2,cse:true,wah:true,ewp:false,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"8-year mechanical fitter with strong pump and rotating equipment experience. Telehandler ticket."},
+      {id:13,name:"Omkar Dorugade",role:"Fitter",group:"Fitter",shift:"Day",days:4,ty:12,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"12+ year maintenance fitter with strong preventative maintenance and precision assembly background."},
+      {id:35,name:"Herbert Mukunga",role:"Fitter",group:"Fitter",shift:"Night",days:6,ty:6,sy:5,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:true,dog:false,rig:"",gta:true,fa:true,status:"confirmed",summary:"Mechanical fitter with turbine and conveyor expertise and a strong ticket set including telehandler, EWP, HR and gas testing."},
+      {id:36,name:"Ganesh Mohite",role:"Fitter",group:"Fitter",shift:"Night",days:6,ty:30,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"30-year veteran with live gas plant, offshore and major resource project experience. One of the most experienced fitters on the crew."},
+      {id:37,name:"Jordi Patino Roca",role:"Fitter",group:"Fitter",shift:"Night",days:6,ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with intermediate rigging and dogging plus broad Tier 1 FIFO site exposure."},
+      {id:38,name:"Gurshwinder Singh",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:3,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with Greenbushes shutdown experience, broad site exposure and forklift / EWP tickets."},
+      {id:39,name:"Kulvinder Singh",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:2,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with broad processing plant experience including reclaimers, crushers and apron feeders."},
+      {id:40,name:"Abdikadir Mohamed",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with solid shutdown maintenance experience across conveyors, crushers, rollers and valves."},
+      {id:41,name:"Jamie Adams",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:7,sy:5,cse:true,wah:true,ewp:false,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"HV mechanical fitter with strong technical precision and telehandler capability."},
+      {id:42,name:"Omar Anadif",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:5,sy:2,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:true,fa:true,status:"confirmed",summary:"Mechanical tradesperson with exceptional ticket depth including forklift, EWP, telehandler, HR and gas testing."},
+      {id:43,name:"Clemens Schaaf",role:"Fitter",group:"Fitter",shift:"Night",days:4,ty:5,sy:1,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:false,status:"confirmed",summary:"German-trained mechatronics technician with mechanical trade qualification, dogging, basic rigging, EWP and forklift tickets."},
+
+      {id:59,name:"TBC",role:"Fitter - Conveyor Inspections",group:"Inspections",shift:"Day",days:5,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Conveyor inspections / skirt adjustments — position to be confirmed."},
+      {id:60,name:"Timo Gronenberg",role:"Fitter - Conveyor Inspections",group:"Inspections",shift:"Day",days:5,ty:7,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"German-qualified industrial mechanic with strong mechanical fundamentals and conveyor shutdown experience."},
+      {id:61,name:"Gerry Uy",role:"Fitter - Conveyor Inspections",group:"Inspections",shift:"Night",days:5,ty:4,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:true,dog:false,rig:"Int Scaff",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with Karara, Boddington and Ravensthorpe experience. Strong processing plant background with forklift and HR."},
+      {id:62,name:"Samuel Gunn",role:"Fitter - Conveyor Inspections",group:"Inspections",shift:"Night",days:5,ty:3,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical engineer with rotating machines specialisation and strong conveyor, pump and bearing diagnostics capability."},
+      {id:63,name:"Amit Gund",role:"Fitter - Inspections",group:"Inspections",shift:"Day",days:5,ty:3,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with HPGR inspection and processing plant background plus dogging and forklift tickets."},
+      {id:64,name:"Armand Loupias",role:"Fitter - Inspections",group:"Inspections",shift:"Night",days:5,ty:5,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"IRATA L1",gta:false,fa:false,status:"confirmed",summary:"Mechanical fitter with crushers, mills and conveyors background plus IRATA L1 rope access."},
+
+      {id:17,name:"Joe Dack",role:"Rigger Advanced",group:"Rigger",shift:"Day",days:9,ty:4,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int + IRATA L1",gta:false,fa:true,status:"confirmed",summary:"Intermediate rigger with IRATA L1 rope access, strong leadership background and dogging ticket."},
+      {id:18,name:"Darren Taylor",role:"Rigger Advanced",group:"Rigger",shift:"Day",days:7,ty:20,sy:13,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:true,dog:true,rig:"Adv",gta:false,fa:true,status:"confirmed",summary:"Highly experienced advanced rigger with long Alcoa Kwinana experience, crane operations, dogging and HR."},
+      {id:46,name:"Ricky Truslove",role:"Rigger Advanced",group:"Rigger",shift:"Night",days:6,ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,status:"confirmed",summary:"Advanced scaffolder with intermediate rigging and dogging and consistent shutdown experience."},
+      {id:47,name:"Chaeyoon Kim",role:"Rigger Advanced",group:"Rigger",shift:"Night",days:4,ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Int",gta:false,fa:false,status:"confirmed",summary:"Intermediate rigger with shutdown exposure plus overhead crane, EWP, forklift and dogging."},
+
+      {id:53,name:"Christopher McLennan",role:"Roller Crew Supervisor",group:"Roller Crew",shift:"Day",days:7,ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,status:"confirmed",summary:"Mechanical supervisor supporting roller crew leadership depth with strong shutdown planning and supervision experience."},
+      {id:54,name:"Stefanos Karikis",role:"Roller Tech",group:"Roller Crew",shift:"Day",days:7,ty:3,sy:3,cse:true,wah:true,ewp:false,tele:true,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:false,status:"confirmed",summary:"Trade assistant / serviceman with field logistics, rigging support, telehandler, forklift and overhead crane experience. Suited to roller crew support and materials handling."},
+      {id:551,name:"King Garcia",role:"Roller Tech",group:"Roller Crew",shift:"Day",days:7,ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Mechanical trades assistant with conveyor roller, crusher, screen and chute liner experience plus forklift ticket."},
+      {id:561,name:"Jeremy Larock",role:"Roller Tech",group:"Roller Crew",shift:"Day",days:6,ty:3,sy:3,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Operator and trade assistant with strong ticket depth including HR, telehandler, EWP and forklift."},
+      {id:571,name:"Henri Martins",role:"Roller Tech",group:"Roller Crew",shift:"Day",days:6,ty:2,sy:1,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Trade assistant and roller tech with developing experience and EWP ticket."},
+
+      {id:50,name:"Sebastien Djaffer",role:"Lube Tech T/A",group:"Lube Tech",shift:"Day",days:4,ty:1,sy:1,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Lube tech and trade assistant with strong site induction coverage and telehandler / forklift capability."},
+      {id:51,name:"Mehdi Mokeddem",role:"Lube Tech T/A",group:"Lube Tech",shift:"Day",days:4,ty:2,sy:2,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"FIFO lube technician with shutdown experience, automatic grease systems, SAP and oil sampling background."},
+      {id:52,name:"Lakshman Vasanthan",role:"Lube Tech T/A",group:"Lube Tech",shift:"Night",days:5,ty:3,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Lube tech supervisor with mechanical trade background and solid shutdown leadership capability."},
+
+      {id:19,name:"Mehdi Bendani",role:"T.A. (Sentry)",group:"Trade Assistant",shift:"Day",days:7,ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"IRATA L1",gta:false,fa:false,status:"confirmed",summary:"Trade assistant with rigging support and IRATA L1 rope access. Capable of confined space hole watch and sentry duties."},
+      {id:20,name:"Madeline Jones",role:"T.A. (Sentry)",group:"Trade Assistant",shift:"Day",days:10,ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Trade assistant with confined space hole watch experience. LF VOC confirmed per roster requirements."},
+      {id:48,name:"Federico Sarti",role:"T.A. (Sentry)",group:"Trade Assistant",shift:"Night",days:4,ty:12,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Experienced mechanical trades background adapted into TA / sentry support role with HR licence."},
+      {id:49,name:"Lea Mondesir",role:"T.A. (Sentry)",group:"Trade Assistant",shift:"Night",days:4,ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Trade assistant with SRG shutdown experience, utility background and HR licence."},
+      {id:28,name:"Ellie Jeon",role:"T.A. Telehandler",group:"Trade Assistant",shift:"Day",days:10,ty:5,sy:4,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,status:"confirmed",summary:"Experienced plant operator with telehandler, loader, excavator and dump truck capability plus HR licence."},
+      {id:29,name:"Lewis Ferris",role:"T.A. Telehandler",group:"Trade Assistant",shift:"Night",days:8,ty:2,sy:1,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"confirmed",summary:"Materials logistics officer with telehandler and EWP capability plus strong site induction coverage."},
+      {id:30,name:"TBC",role:"Bus Driver",group:"Trade Assistant",shift:"Day",days:9,ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,status:"tbc",summary:"Bus driver — position to be confirmed."}
+    ];
+
+    const ROSTER = [
+      { personId:14, notes:"", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:15, notes:"", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:44, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:45, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:30, notes:"", codes:["","","","DIP","DS","DS","DS","DS","DS","DS","DS","DS","DS","DOP","","","",""] },
+      { personId:16, notes:"", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:31, notes:"Extra Nightshift - Plant Run up", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:22, notes:"", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""] },
+      { personId:23, notes:"", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""] },
+      { personId:24, notes:"", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""] },
+      { personId:25, notes:"", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""] },
+      { personId:5, notes:"Pre Shut Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:6, notes:"Pre Shut Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:7, notes:"Post Shut Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:8, notes:"Post Shut Crew", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:9, notes:"Post Shut Crew", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:10, notes:"Post Shut Crew", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:11, notes:"", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:12, notes:"", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:13, notes:"", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:35, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:36, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:37, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:38, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:39, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:40, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:41, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:42, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:43, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:59, notes:"Inspections", codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""] },
+      { personId:60, notes:"Inspections", codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""] },
+      { personId:61, notes:"Inspections", codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:62, notes:"Inspections", codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:63, notes:"Inspections", codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""] },
+      { personId:64, notes:"Inspections", codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:26, notes:"", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","","",""] },
+      { personId:27, notes:"", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""] },
+      { personId:54, notes:"Roller Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:50, notes:"Lube Team 1 D/S Only", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:51, notes:"Lube Team 2", codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:52, notes:"Lube Team 2", codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:17, notes:"Post Shut Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:18, notes:"Post Shut Crew", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:46, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:47, notes:"", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:53, notes:"Roller Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:551, notes:"Roller Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:561, notes:"Roller Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:571, notes:"Roller Crew", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:1, notes:"", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:2, notes:"Pre/Post Shut Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:3, notes:"Pre/Post Shut Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:4, notes:"Pre Shut Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""] },
+      { personId:55, notes:"", codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""] },
+      { personId:56, notes:"Extra Nightshift - Plant Run up", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""] },
+      { personId:57, notes:"", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:58, notes:"", codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:19, notes:"Post Shut Crew", codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:20, notes:"Post Shut - Must have LF VOC", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] },
+      { personId:48, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:49, notes:"Extra Nightshift - Plant Run up", codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""] },
+      { personId:28, notes:"Pre/Post Shut Crew", codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""] }
+    ];
+
+    const CONTINGENCY_BY_GROUP = {
+      "Leadership": 0,
+      "HSE": 0,
+      "Boilermaker": 3,
+      "Electrical": 1,
+      "Fitter": 12,
+      "Inspections": 0,
+      "Rigger": 3,
+      "Roller Crew": 4,
+      "Lube Tech": 0,
+      "Trade Assistant": 6
+    };
 
     function App() {
       const [tab, setTab] = useState("profile");
-      const [fG, sfG] = useState("All");
-      const [fS, sfS] = useState("All");
-      const [fT, sfT] = useState([]);
-      const [rShift, setRShift] = useState("All");
-      const [rRole, setRRole] = useState("All");
+      const [groupFilter, setGroupFilter] = useState("All");
+      const [shiftFilter, setShiftFilter] = useState("All");
+      const [ticketFilters, setTicketFilters] = useState([]);
+      const [rosterShift, setRosterShift] = useState("All");
+      const [rosterRole, setRosterRole] = useState("All");
 
-      const toggle = k => sfT(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
+      const personById = useMemo(() => {
+        const map = {};
+        PEOPLE.forEach(p => { map[p.id] = p; });
+        return map;
+      }, []);
 
-      const filtered = useMemo(() => E.filter(e => {
-        if (fG !== "All" && e.group !== fG) return false;
-        if (fS !== "All" && e.shift !== fS) return false;
-        if (fT.length > 0) {
-          for (const t of fT) {
-            if (t === "rig") {
-              if (!e.rig) return false;
-            } else {
-              if (!e[t]) return false;
+      const rosterRows = useMemo(() => {
+        return ROSTER.map(r => ({ ...personById[r.personId], notes: r.notes, codes: r.codes })).filter(Boolean);
+      }, [personById]);
+
+      const namedPeople = useMemo(() => PEOPLE.filter(p => p.status !== "tbc"), []);
+      const tbcPeople = useMemo(() => PEOPLE.filter(p => p.status === "tbc"), []);
+      const contingencyTotal = useMemo(() => Object.values(CONTINGENCY_BY_GROUP).reduce((a,b) => a + b, 0), []);
+
+      const averageTradeYears = useMemo(() => {
+        const pool = namedPeople.filter(p => p.ty > 0);
+        return (pool.reduce((s,p) => s + p.ty, 0) / (pool.length || 1)).toFixed(1);
+      }, [namedPeople]);
+
+      const averageShutdownYears = useMemo(() => {
+        const pool = namedPeople.filter(p => p.sy > 0);
+        return (pool.reduce((s,p) => s + p.sy, 0) / (pool.length || 1)).toFixed(1);
+      }, [namedPeople]);
+
+      const filteredPeople = useMemo(() => {
+        return PEOPLE.filter(p => {
+          if (groupFilter !== "All" && p.group !== groupFilter) return false;
+          if (shiftFilter !== "All" && p.shift !== shiftFilter) return false;
+
+          if (ticketFilters.length > 0) {
+            for (const t of ticketFilters) {
+              if (t === "rig") {
+                if (!p.rig) return false;
+              } else {
+                if (!p[t]) return false;
+              }
             }
           }
-        }
-        return true;
-      }), [fG, fS, fT]);
+          return true;
+        });
+      }, [groupFilter, shiftFilter, ticketFilters]);
 
-      const groups = [...new Set(E.map(e => e.group))];
-      const tN = E.filter(e => !e.name.startsWith("TBC")).length;
-      const tT = E.filter(e => e.name.startsWith("TBC")).length;
-      const aT = (E.filter(e => e.ty > 0).reduce((s, e) => s + e.ty, 0) / (E.filter(e => e.ty > 0).length || 1)).toFixed(1);
-      const aS = (E.filter(e => e.sy > 0).reduce((s, e) => s + e.sy, 0) / (E.filter(e => e.sy > 0).length || 1)).toFixed(1);
+      const toggleTicket = key => {
+        setTicketFilters(prev => prev.includes(key) ? prev.filter(x => x !== key) : [...prev, key]);
+      };
 
-      const tc = {};
-      TC.forEach(t => {
-        tc[t.label] = E.filter(e => t.key === "rig" ? !!e[t.key] : e[t.key]).length;
-      });
+      const ticketCoverage = useMemo(() => {
+        const counts = {};
+        TICKET_META.forEach(t => {
+          counts[t.label] = PEOPLE.filter(p => t.key === "rig" ? !!p[t.key] : p[t.key]).length;
+        });
+        return counts;
+      }, []);
 
-      const rgd = GROUP_ORDER.filter(g => E.some(e => e.group === g) || (CONTINGENCY.byGroup[g] || 0) > 0).map(g => ({
-        name: g,
-        filled: E.filter(e => e.group === g && !e.name.startsWith("TBC")).length,
-        tbc: E.filter(e => e.group === g && e.name.startsWith("TBC")).length,
-        contingency: CONTINGENCY.byGroup[g] || 0
-      }));
+      const shiftDistribution = useMemo(() => ([
+        { name: "Day Shift", value: PEOPLE.filter(p => p.shift === "Day").length },
+        { name: "Night Shift", value: PEOPLE.filter(p => p.shift === "Night").length }
+      ]), []);
 
-      const sd = [
-        { name: "Day Shift", value: E.filter(e => e.shift === "Day").length },
-        { name: "Night Shift", value: E.filter(e => e.shift === "Night").length }
-      ];
-
-      const tradeSummary = useMemo(() => {
-        return GROUP_ORDER.filter(g => E.some(e => e.group === g) || (CONTINGENCY.byGroup[g] || 0) > 0).map(g => {
-          const planned = E.filter(e => e.group === g).length;
-          const confirmed = E.filter(e => e.group === g && !e.name.startsWith("TBC")).length;
-          const gap = E.filter(e => e.group === g && e.name.startsWith("TBC")).length;
-          const contingency = CONTINGENCY.byGroup[g] || 0;
+      const byTradeSummary = useMemo(() => {
+        return GROUP_ORDER.filter(g => PEOPLE.some(p => p.group === g) || (CONTINGENCY_BY_GROUP[g] || 0) > 0).map(g => {
+          const planned = PEOPLE.filter(p => p.group === g).length;
+          const confirmed = PEOPLE.filter(p => p.group === g && p.status !== "tbc").length;
+          const gap = PEOPLE.filter(p => p.group === g && p.status === "tbc").length;
+          const contingency = CONTINGENCY_BY_GROUP[g] || 0;
 
           let readiness = "Covered";
           let readinessColor = RM;
-
           if (gap > 0) {
             readiness = "Gap";
             readinessColor = RH;
@@ -300,66 +335,120 @@
         });
       }, []);
 
+      const chartDataByTrade = useMemo(() => {
+        return byTradeSummary.map(r => ({
+          name: r.group,
+          filled: r.confirmed,
+          tbc: r.gap,
+          contingency: r.contingency
+        }));
+      }, [byTradeSummary]);
+
+      const criticalRoles = useMemo(() => {
+        const wanted = ["Superintendent","Supervisor DS","Supervisor NS","Supervisor Elec","HSE","Roller Crew Supervisor"];
+        return wanted.map(role => {
+          const matching = PEOPLE.filter(p => p.role === role);
+          return {
+            role,
+            planned: matching.length,
+            confirmed: matching.filter(p => p.status !== "tbc").length,
+            gap: matching.filter(p => p.status === "tbc").length
+          };
+        }).filter(x => x.planned > 0);
+      }, []);
+
       const risks = useMemo(() => {
-        const r = [];
-        groups.forEach(g => {
-          ["Day", "Night"].forEach(s => {
-            const crew = E.filter(e => e.group === g && e.shift === s);
+        const out = [];
+
+        GROUP_ORDER.forEach(group => {
+          SHIFT_ORDER.forEach(shift => {
+            const crew = PEOPLE.filter(p => p.group === group && p.shift === shift);
             if (!crew.length) return;
 
-            const named = crew.filter(e => !e.name.startsWith("TBC"));
-            const tbc = crew.filter(e => e.name.startsWith("TBC"));
+            const named = crew.filter(p => p.status !== "tbc");
+            const tbc = crew.filter(p => p.status === "tbc");
 
             if (tbc.length) {
-              r.push({ group: g, shift: s, level: "HIGH", issue: `${tbc.length} unfilled position(s)`, action: "Source and confirm personnel before shutdown mobilisation." });
+              out.push({
+                group,
+                shift,
+                level: "HIGH",
+                issue: `${tbc.length} unfilled position(s)`,
+                action: "Source and confirm personnel before shutdown mobilisation."
+              });
             }
 
-            named.forEach(e => {
-              if (e.sy < 1 && e.ty > 0) {
-                r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — limited shutdown experience`, action: "Pair with experienced worker for initial shifts. Do not assign to isolated or critical path tasks without direct oversight." });
+            named.forEach(p => {
+              if (p.sy < 1 && p.ty > 0) {
+                out.push({
+                  group,
+                  shift,
+                  level: "MED",
+                  issue: `${p.name} — limited shutdown experience`,
+                  action: "Pair with experienced worker for initial shifts and avoid isolated critical path allocation without direct oversight."
+                });
+              }
+
+              if (String(p.summary || "").toLowerCase().includes("resume to be provided")) {
+                out.push({
+                  group,
+                  shift,
+                  level: "MED",
+                  issue: `${p.name} — resume not yet received`,
+                  action: "Obtain and review resume before mobilisation to verify competency."
+                });
               }
             });
 
-            if (["Fitter", "Trade Assistant", "Roller Crew"].includes(g) && !named.some(e => e.tele) && named.length > 0) {
-              r.push({ group: g, shift: s, level: "LOW", issue: "No telehandler ticket holder in group", action: "Confirm telehandler access from adjacent crew or source ticket holder." });
+            if (["Fitter","Trade Assistant","Roller Crew"].includes(group) && named.length > 0 && !named.some(p => p.tele)) {
+              out.push({
+                group,
+                shift,
+                level: "LOW",
+                issue: "No telehandler ticket holder in group",
+                action: "Confirm telehandler coverage from adjacent crew or source additional ticketed support."
+              });
             }
 
-            if (!named.some(e => e.gta) && named.length > 2 && ["Fitter", "Boilermaker"].includes(g)) {
-              r.push({ group: g, shift: s, level: "LOW", issue: "No gas testing ticket holder in group", action: "Confirm GTA coverage from HSE or adjacent crew for confined space/hot work entries." });
+            if (["Fitter","Boilermaker"].includes(group) && named.length > 2 && !named.some(p => p.gta)) {
+              out.push({
+                group,
+                shift,
+                level: "LOW",
+                issue: "No gas testing ticket holder in group",
+                action: "Confirm gas testing coverage from HSE or adjacent crew for confined space / hot work access."
+              });
             }
-
-            named.forEach(e => {
-              if (e.sum.includes("resume to be provided")) {
-                r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — resume not yet received`, action: "Obtain and review resume before mobilisation to verify competency." });
-              }
-            });
           });
         });
 
-        return r.sort((a, b) => ({ HIGH: 0, MED: 1, LOW: 2 })[a.level] - ({ HIGH: 0, MED: 1, LOW: 2 })[b.level]);
+        return out.sort((a, b) => ({ HIGH:0, MED:1, LOW:2 }[a.level] - ({ HIGH:0, MED:1, LOW:2 }[b.level]));
       }, []);
 
-      const ranked = useMemo(() => {
-        const r = {};
-        groups.forEach(g => {
-          r[g] = E.filter(e => e.group === g && !e.name.startsWith("TBC"))
+      const rankedByGroup = useMemo(() => {
+        const result = {};
+        GROUP_ORDER.forEach(g => {
+          result[g] = PEOPLE
+            .filter(p => p.group === g && p.status !== "tbc")
             .sort((a, b) => (b.ty + b.sy * 2) - (a.ty + a.sy * 2));
         });
-        return r;
+        return result;
       }, []);
 
-      const rosterRoles = [...new Set(ROSTER.map(r => r.role))].sort();
+      const rosterRoles = useMemo(() => [...new Set(rosterRows.map(r => r.role))].sort(), [rosterRows]);
 
       const filteredRoster = useMemo(() => {
-        return ROSTER.filter(r => {
-          if (rShift === "Day" && !r.codes.includes("DS")) return false;
-          if (rShift === "Night" && !r.codes.includes("NS")) return false;
-          if (rRole !== "All" && r.role !== rRole) return false;
+        return rosterRows.filter(r => {
+          if (rosterShift === "Day" && !r.codes.includes("DS")) return false;
+          if (rosterShift === "Night" && !r.codes.includes("NS")) return false;
+          if (rosterRole !== "All" && r.role !== rosterRole) return false;
           return true;
         });
-      }, [rShift, rRole]);
+      }, [rosterRows, rosterShift, rosterRole]);
 
-      const SC = ({ label, value, sub }) =>
+      const printRisks = useMemo(() => risks.slice(0, 8), [risks]);
+
+      const Card = ({ label, value, sub }) =>
         React.createElement("div", {
           style: {
             background: "white",
@@ -373,7 +462,7 @@
           sub && React.createElement("div", { style: { fontSize: 11, color: "#8C8C8C", marginTop: 3 } }, sub)
         );
 
-      const RB = ({ level }) =>
+      const RiskBadge = ({ level }) =>
         React.createElement("span", {
           style: {
             display: "inline-block",
@@ -386,7 +475,7 @@
           }
         }, level);
 
-      const ReadinessPill = ({ text, color }) =>
+      const StatusBadge = ({ text, color }) =>
         React.createElement("span", {
           style: {
             display: "inline-block",
@@ -400,7 +489,7 @@
           }
         }, text);
 
-      const TabBtn = ({ id, label }) =>
+      const TabButton = ({ id, label }) =>
         React.createElement("button", {
           onClick: () => setTab(id),
           style: {
@@ -413,8 +502,7 @@
             fontSize: 13,
             color: tab === id ? SRG_DARK : SRG_GREY,
             textTransform: "uppercase",
-            letterSpacing: 0.8,
-            transition: "all .15s"
+            letterSpacing: 0.8
           }
         }, label);
 
@@ -426,6 +514,7 @@
           color: SRG_DARK
         }
       },
+
         React.createElement("div", {
           style: {
             background: "white",
@@ -465,7 +554,7 @@
               }, "Covalent Lithium — Workforce Dashboard"),
               React.createElement("div", {
                 style: { fontSize: 12, color: SRG_GREY, marginTop: 2 }
-              }, `Mt Holland · April–May 2026 · ${E.length} Positions · Updated ${new Date().toLocaleDateString("en-AU")}`)
+              }, `Mt Holland · April–May 2026 · ${PEOPLE.length} Positions · Updated ${new Date().toLocaleDateString("en-AU")}`)
             )
           ),
           React.createElement("div", {
@@ -478,9 +567,10 @@
               borderTop: `1px solid ${SRG_BORDER}`
             }
           },
-            React.createElement(TabBtn, { id: "profile", label: "Workforce Profile" }),
-            React.createElement(TabBtn, { id: "risk", label: "Risk Assessment" }),
-            React.createElement(TabBtn, { id: "roster", label: "Shutdown Roster" })
+            React.createElement(TabButton, { id: "profile", label: "Workforce Profile" }),
+            React.createElement(TabButton, { id: "risk", label: "Risk Assessment" }),
+            React.createElement(TabButton, { id: "roster", label: "Shutdown Roster" }),
+            React.createElement(TabButton, { id: "print", label: "Print Summary" })
           )
         ),
 
@@ -491,12 +581,12 @@
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
             },
-              React.createElement(SC, { label: "Planned Workforce", value: E.length, sub: "Core planned positions" }),
-              React.createElement(SC, { label: "Confirmed Workforce", value: tN, sub: "Named personnel only" }),
-              React.createElement(SC, { label: "Open Positions", value: tT, sub: "Still to be confirmed" }),
-              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: "Separate backup workforce" }),
-              React.createElement(SC, { label: "Avg Trade Experience", value: `${aT} yrs`, sub: "Named personnel only" }),
-              React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" })
+              React.createElement(Card, { label: "Planned Workforce", value: PEOPLE.length, sub: "Core planned positions" }),
+              React.createElement(Card, { label: "Confirmed Workforce", value: namedPeople.length, sub: "Named personnel only" }),
+              React.createElement(Card, { label: "Open Positions", value: tbcPeople.length, sub: "Still to be confirmed" }),
+              React.createElement(Card, { label: "Contingency Depth", value: contingencyTotal, sub: "Separate backup workforce" }),
+              React.createElement(Card, { label: "Avg Trade Experience", value: `${averageTradeYears} yrs`, sub: "Named personnel only" }),
+              React.createElement(Card, { label: "Avg Shutdown Experience", value: `${averageShutdownYears} yrs`, sub: "Named personnel only" })
             ),
 
             React.createElement("div", {
@@ -521,17 +611,17 @@
                   )
                 ),
                 React.createElement("tbody", null,
-                  tradeSummary.map((r, i) =>
+                  byTradeSummary.map((r, i) =>
                     React.createElement("tr", {
                       key: r.group,
                       style: { borderBottom: `1px solid ${SRG_BORDER}`, background: i % 2 === 0 ? "white" : "#FAFAFA" }
                     },
                       React.createElement("td", { style: { padding: "10px 12px", fontWeight: 700, color: SRG_DARK } }, r.group),
                       React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700 } }, r.planned),
-                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: SRG_DARK } }, r.confirmed),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700 } }, r.confirmed),
                       React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: r.gap > 0 ? RH : SRG_DARK } }, r.gap),
                       React.createElement("td", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 700, color: r.contingency > 0 ? SRG_DARK : "#B0B0B0" } }, r.contingency || "–"),
-                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(ReadinessPill, { text: r.readiness, color: r.readinessColor }))
+                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(StatusBadge, { text: r.readiness, color: r.readinessColor }))
                     )
                   )
                 )
@@ -548,7 +638,7 @@
                   style: { fontSize: 11, fontWeight: 700, marginBottom: 16, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 1 }
                 }, "Manning by Trade Group"),
                 React.createElement(ResponsiveContainer, { width: "100%", height: 260 },
-                  React.createElement(BarChart, { data: rgd, margin: { top: 5, right: 5, left: -15, bottom: 50 } },
+                  React.createElement(BarChart, { data: chartDataByTrade, margin: { top: 5, right: 5, left: -15, bottom: 50 } },
                     React.createElement(CartesianGrid, { strokeDasharray: "3 3", stroke: "#EEE", vertical: false }),
                     React.createElement(XAxis, {
                       dataKey: "name",
@@ -578,7 +668,7 @@
                     React.createElement(ResponsiveContainer, { width: "100%", height: 170 },
                       React.createElement(PieChart, null,
                         React.createElement(Pie, {
-                          data: sd,
+                          data: shiftDistribution,
                           cx: "50%",
                           cy: "50%",
                           innerRadius: 45,
@@ -587,12 +677,12 @@
                           label: false,
                           labelLine: false
                         },
-                          sd.map((_, i) => React.createElement(Cell, { key: i, fill: i === 0 ? SRG_DARK : SRG_RED }))
+                          shiftDistribution.map((_, i) => React.createElement(Cell, { key: i, fill: i === 0 ? SRG_DARK : SRG_RED }))
                         )
                       )
                     ),
                     React.createElement("div", { style: { display: "flex", gap: 12, marginTop: 8, fontSize: 11 } },
-                      sd.map((s, i) => React.createElement("div", {
+                      shiftDistribution.map((s, i) => React.createElement("div", {
                         key: i,
                         style: { display: "flex", alignItems: "center", gap: 5 }
                       },
@@ -604,7 +694,7 @@
                     )
                   ),
                   React.createElement("div", { style: { flex: 1 } },
-                    Object.entries(tc).map(([k, v]) =>
+                    Object.entries(ticketCoverage).map(([k, v]) =>
                       React.createElement("div", {
                         key: k,
                         style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }
@@ -618,14 +708,14 @@
                           React.createElement("div", {
                             style: {
                               height: "100%",
-                              width: `${v / E.length * 100}%`,
-                              background: v / E.length > 0.5 ? SRG_DARK : v / E.length > 0.25 ? RM : SRG_RED
+                              width: `${v / PEOPLE.length * 100}%`,
+                              background: v / PEOPLE.length > 0.5 ? SRG_DARK : v / PEOPLE.length > 0.25 ? RM : SRG_RED
                             }
                           })
                         ),
                         React.createElement("div", {
                           style: { fontSize: 10, fontWeight: 700, width: 28, textAlign: "right", color: SRG_DARK }
-                        }, `${Math.round(v / E.length * 100)}%`)
+                        }, `${Math.round(v / PEOPLE.length * 100)}%`)
                       )
                     )
                   )
@@ -640,24 +730,24 @@
                 style: { fontSize: 11, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8 }
               }, "Filter:"),
               React.createElement("select", {
-                value: fG,
-                onChange: e => sfG(e.target.value),
+                value: groupFilter,
+                onChange: e => setGroupFilter(e.target.value),
                 style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
               },
                 React.createElement("option", { value: "All" }, "All Groups"),
-                groups.map(g => React.createElement("option", { key: g, value: g }, g))
+                GROUP_ORDER.filter(g => PEOPLE.some(p => p.group === g)).map(g => React.createElement("option", { key: g, value: g }, g))
               ),
               React.createElement("select", {
-                value: fS,
-                onChange: e => sfS(e.target.value),
+                value: shiftFilter,
+                onChange: e => setShiftFilter(e.target.value),
                 style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
               },
                 React.createElement("option", { value: "All" }, "All Shifts"),
                 React.createElement("option", { value: "Day" }, "Day Shift"),
                 React.createElement("option", { value: "Night" }, "Night Shift")
               ),
-              fT.length > 0 && React.createElement("button", {
-                onClick: () => sfT([]),
+              ticketFilters.length > 0 && React.createElement("button", {
+                onClick: () => setTicketFilters([]),
                 style: {
                   padding: "6px 12px",
                   border: `1px solid ${SRG_RED}`,
@@ -670,7 +760,7 @@
               }, "Clear tickets ✕"),
               React.createElement("span", {
                 style: { fontSize: 11, color: SRG_GREY, marginLeft: "auto", fontWeight: 600 }
-              }, `${filtered.length} personnel shown`)
+              }, `${filteredPeople.length} personnel shown`)
             ),
 
             React.createElement("div", {
@@ -679,32 +769,21 @@
               React.createElement("span", {
                 style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, marginRight: 4, textTransform: "uppercase", letterSpacing: 0.8 }
               }, "Tickets:"),
-              [
-                { key: "cse", label: "CSE" },
-                { key: "wah", label: "WAH" },
-                { key: "ewp", label: "EWP" },
-                { key: "tele", label: "Telehandler" },
-                { key: "fork", label: "Forklift" },
-                { key: "hr", label: "HR Licence" },
-                { key: "dog", label: "Dogging" },
-                { key: "rig", label: "Rigging" },
-                { key: "gta", label: "Gas Test" },
-                { key: "fa", label: "First Aid" }
-              ].map(t => {
-                const a = fT.includes(t.key);
+              TICKET_FILTERS.map(t => {
+                const active = ticketFilters.includes(t.key);
                 return React.createElement("button", {
                   key: t.key,
-                  onClick: () => toggle(t.key),
+                  onClick: () => toggleTicket(t.key),
                   style: {
                     padding: "5px 12px",
-                    border: a ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    border: active ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
                     cursor: "pointer",
                     fontSize: 11,
-                    fontWeight: a ? 700 : 500,
-                    background: a ? SRG_RED : "white",
-                    color: a ? "white" : SRG_DARK
+                    fontWeight: active ? 700 : 500,
+                    background: active ? SRG_RED : "white",
+                    color: active ? "white" : SRG_DARK
                   }
-                }, t.label + (a ? ` (${filtered.length})` : ""));
+                }, t.label + (active ? ` (${filteredPeople.length})` : ""));
               })
             ),
 
@@ -720,7 +799,7 @@
                     React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, "Days"),
                     React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, React.createElement(React.Fragment, null, "Trade", React.createElement("br"), "Yrs")),
                     React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, React.createElement(React.Fragment, null, "S/D", React.createElement("br"), "Yrs")),
-                    TC.map(t => React.createElement("th", {
+                    TICKET_META.map(t => React.createElement("th", {
                       key: t.key,
                       style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" }
                     }, t.label)),
@@ -728,45 +807,45 @@
                   )
                 ),
                 React.createElement("tbody", null,
-                  filtered.map((e, i) => {
-                    const isTBC = e.name.startsWith("TBC");
+                  filteredPeople.map((p, i) => {
+                    const isTBC = p.status === "tbc";
                     const bg = isTBC ? "#FFF9E6" : i % 2 === 0 ? "#FAFAFA" : "white";
                     return React.createElement("tr", {
-                      key: e.id,
+                      key: p.id,
                       style: { background: bg, borderBottom: `1px solid ${SRG_BORDER}` }
                     },
                       React.createElement("td", {
                         style: { padding: "9px 12px", fontWeight: 700, color: isTBC ? RM : SRG_DARK, whiteSpace: "nowrap", position: "sticky", left: 0, background: bg, zIndex: 1 }
-                      }, e.name),
-                      React.createElement("td", { style: { padding: "9px 8px", color: SRG_GREY, whiteSpace: "nowrap" } }, e.role),
+                      }, p.name),
+                      React.createElement("td", { style: { padding: "9px 8px", color: SRG_GREY, whiteSpace: "nowrap" } }, p.role),
                       React.createElement("td", { style: { padding: "9px 6px", textAlign: "center" } },
                         React.createElement("span", {
                           style: {
                             padding: "3px 8px",
                             fontSize: 9,
                             fontWeight: 700,
-                            background: e.shift === "Day" ? "#E8F0FE" : SRG_DARK,
-                            color: e.shift === "Day" ? "#1E40AF" : "white",
+                            background: p.shift === "Day" ? "#E8F0FE" : SRG_DARK,
+                            color: p.shift === "Day" ? "#1E40AF" : "white",
                             textTransform: "uppercase",
                             letterSpacing: 0.3
                           }
-                        }, e.shift)
+                        }, p.shift)
                       ),
-                      React.createElement("td", { style: { padding: "9px 4px", textAlign: "center", fontWeight: 700 } }, e.days),
+                      React.createElement("td", { style: { padding: "9px 4px", textAlign: "center", fontWeight: 700 } }, p.days),
                       React.createElement("td", {
-                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: e.ty >= 10 ? RL : e.ty >= 3 ? SRG_DARK : "#B0B0B0" }
-                      }, e.ty || "–"),
+                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: p.ty >= 10 ? RL : p.ty >= 3 ? SRG_DARK : "#B0B0B0" }
+                      }, p.ty || "–"),
                       React.createElement("td", {
-                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: e.sy >= 5 ? RL : e.sy >= 2 ? SRG_DARK : "#B0B0B0" }
-                      }, e.sy || "–"),
-                      TC.map(t => {
-                        const v = e[t.key];
+                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: p.sy >= 5 ? RL : p.sy >= 2 ? SRG_DARK : "#B0B0B0" }
+                      }, p.sy || "–"),
+                      TICKET_META.map(t => {
+                        const v = p[t.key];
                         return React.createElement("td", {
                           key: t.key,
                           style: { padding: "9px 4px", textAlign: "center", fontSize: t.key === "rig" ? 8 : 13, color: t.key === "rig" ? SRG_GREY : SRG_RED, fontWeight: t.key === "rig" ? 600 : 400 }
                         }, t.key === "rig" ? (v || "") : (v ? "✓" : ""));
                       }),
-                      React.createElement("td", { style: { padding: "9px 12px", fontSize: 11, color: SRG_GREY, lineHeight: 1.5 } }, e.sum)
+                      React.createElement("td", { style: { padding: "9px 12px", fontSize: 11, color: SRG_GREY, lineHeight: 1.5 } }, p.summary)
                     );
                   })
                 )
@@ -779,10 +858,10 @@
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
             },
-              React.createElement(SC, { label: "Total Risks Identified", value: risks.length }),
-              React.createElement(SC, { label: "High Risk", value: risks.filter(r => r.level === "HIGH").length, sub: "Unfilled positions" }),
-              React.createElement(SC, { label: "Medium Risk", value: risks.filter(r => r.level === "MED").length, sub: "Experience / documentation gaps" }),
-              React.createElement(SC, { label: "Low Risk", value: risks.filter(r => r.level === "LOW").length, sub: "Ticket coverage gaps" })
+              React.createElement(Card, { label: "Total Risks Identified", value: risks.length }),
+              React.createElement(Card, { label: "High Risk", value: risks.filter(r => r.level === "HIGH").length, sub: "Unfilled positions" }),
+              React.createElement(Card, { label: "Medium Risk", value: risks.filter(r => r.level === "MED").length, sub: "Experience / documentation gaps" }),
+              React.createElement(Card, { label: "Low Risk", value: risks.filter(r => r.level === "LOW").length, sub: "Ticket coverage gaps" })
             ),
 
             React.createElement("div", {
@@ -810,7 +889,7 @@
                         background: r.level === "HIGH" ? "#FEF2F2" : i % 2 === 0 ? "white" : "#FAFAFA"
                       }
                     },
-                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(RB, { level: r.level })),
+                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(RiskBadge, { level: r.level })),
                       React.createElement("td", { style: { padding: "10px 8px", fontWeight: 700, color: SRG_DARK } }, r.group),
                       React.createElement("td", { style: { padding: "10px 8px", textAlign: "center" } },
                         React.createElement("span", {
@@ -839,20 +918,21 @@
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(360px,1fr))", gap: 16 }
             },
-              GROUP_ORDER.filter(g => ranked[g] && ranked[g].length > 0).map(g =>
+              GROUP_ORDER.filter(g => rankedByGroup[g] && rankedByGroup[g].length > 0).map(g =>
                 React.createElement("div", {
                   key: g,
                   style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "hidden" }
                 },
                   React.createElement("div", {
                     style: { padding: "14px 18px", background: SRG_DARK, color: "white", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `3px solid ${SRG_RED}` }
-                  }, `${g} (${ranked[g].length})`),
-                  ranked[g].map((e, i) => {
-                    const sc = e.ty + e.sy * 2;
-                    const tier = i === 0 ? "Lead" : sc >= 15 ? "Senior" : sc >= 6 ? "Competent" : "Developing";
-                    const tcl = tier === "Lead" ? RL : tier === "Senior" ? "#0891B2" : tier === "Competent" ? SRG_GREY : RM;
+                  }, `${g} (${rankedByGroup[g].length})`),
+                  rankedByGroup[g].map((p, i) => {
+                    const score = p.ty + p.sy * 2;
+                    const tier = i === 0 ? "Lead" : score >= 15 ? "Senior" : score >= 6 ? "Competent" : "Developing";
+                    const color = tier === "Lead" ? RL : tier === "Senior" ? "#0891B2" : tier === "Competent" ? SRG_GREY : RM;
+
                     return React.createElement("div", {
-                      key: e.id,
+                      key: p.id,
                       style: {
                         padding: "10px 18px",
                         borderBottom: `1px solid ${SRG_BORDER}`,
@@ -867,31 +947,16 @@
                       React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                         React.createElement("div", {
                           style: { fontSize: 12, fontWeight: 700, color: SRG_DARK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
-                        }, e.name),
-                        React.createElement("div", { style: { fontSize: 10, color: SRG_GREY, marginTop: 1 } }, `${e.role} · ${e.shift} · ${e.ty}yr trade · ${e.sy}yr shutdown`)
+                        }, p.name),
+                        React.createElement("div", { style: { fontSize: 10, color: SRG_GREY, marginTop: 1 } }, `${p.role} · ${p.shift} · ${p.ty}yr trade · ${p.sy}yr shutdown`)
                       ),
                       React.createElement("span", {
-                        style: { padding: "3px 9px", fontSize: 9, fontWeight: 700, color: "white", background: tcl, flexShrink: 0, textTransform: "uppercase", letterSpacing: 0.3 }
+                        style: { padding: "3px 9px", fontSize: 9, fontWeight: 700, color: "white", background: color, flexShrink: 0, textTransform: "uppercase", letterSpacing: 0.3 }
                       }, tier)
                     );
                   })
                 )
               )
-            ),
-
-            React.createElement("div", {
-              style: { marginTop: 24, padding: 18, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 12, color: SRG_GREY, border: `1px solid ${SRG_BORDER}` }
-            },
-              React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Ranking Methodology: "),
-              "Personnel ranked by composite score (trade years + 2× shutdown years). Tiers: ",
-              React.createElement("span", { style: { color: RL, fontWeight: 700 } }, "Lead"),
-              " = highest ranked in group, ",
-              React.createElement("span", { style: { color: "#0891B2", fontWeight: 700 } }, "Senior"),
-              " = score ≥15, ",
-              React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Competent"),
-              " = score ≥6, ",
-              React.createElement("span", { style: { color: RM, fontWeight: 700 } }, "Developing"),
-              " = score <6. Developing personnel will be paired with Senior/Lead workers and allocated tasks commensurate with their experience level."
             )
           ),
 
@@ -915,49 +980,45 @@
                 React.createElement("span", {
                   style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8 }
                 }, "Filter:"),
-
                 React.createElement("button", {
-                  onClick: () => setRShift("All"),
+                  onClick: () => setRosterShift("All"),
                   style: {
                     padding: "6px 12px",
-                    border: rShift === "All" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
-                    background: rShift === "All" ? SRG_RED : "white",
-                    color: rShift === "All" ? "white" : SRG_DARK,
+                    border: rosterShift === "All" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rosterShift === "All" ? SRG_RED : "white",
+                    color: rosterShift === "All" ? "white" : SRG_DARK,
                     cursor: "pointer",
                     fontSize: 11,
                     fontWeight: 700
                   }
                 }, "All Shifts"),
-
                 React.createElement("button", {
-                  onClick: () => setRShift("Day"),
+                  onClick: () => setRosterShift("Day"),
                   style: {
                     padding: "6px 12px",
-                    border: rShift === "Day" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
-                    background: rShift === "Day" ? SRG_RED : "white",
-                    color: rShift === "Day" ? "white" : SRG_DARK,
+                    border: rosterShift === "Day" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rosterShift === "Day" ? SRG_RED : "white",
+                    color: rosterShift === "Day" ? "white" : SRG_DARK,
                     cursor: "pointer",
                     fontSize: 11,
                     fontWeight: 700
                   }
                 }, "Day Shift"),
-
                 React.createElement("button", {
-                  onClick: () => setRShift("Night"),
+                  onClick: () => setRosterShift("Night"),
                   style: {
                     padding: "6px 12px",
-                    border: rShift === "Night" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
-                    background: rShift === "Night" ? SRG_RED : "white",
-                    color: rShift === "Night" ? "white" : SRG_DARK,
+                    border: rosterShift === "Night" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rosterShift === "Night" ? SRG_RED : "white",
+                    color: rosterShift === "Night" ? "white" : SRG_DARK,
                     cursor: "pointer",
                     fontSize: 11,
                     fontWeight: 700
                   }
                 }, "Night Shift"),
-
                 React.createElement("select", {
-                  value: rRole,
-                  onChange: e => setRRole(e.target.value),
+                  value: rosterRole,
+                  onChange: e => setRosterRole(e.target.value),
                   style: {
                     padding: "7px 12px",
                     border: `1px solid ${SRG_BORDER}`,
@@ -1017,11 +1078,12 @@
                   )
                 ),
                 React.createElement("tbody", null,
-                  filteredRoster.map((r, ri) => {
-                    const isTBC = r.name === "TBC";
-                    const bg = isTBC ? "#FFF9E6" : ri % 2 === 0 ? "#FAFAFA" : "white";
+                  filteredRoster.map((r, i) => {
+                    const isTBC = r.status === "tbc";
+                    const bg = isTBC ? "#FFF9E6" : i % 2 === 0 ? "#FAFAFA" : "white";
+
                     return React.createElement("tr", {
-                      key: ri,
+                      key: `${r.id}-${i}`,
                       style: { background: bg, borderBottom: `1px solid ${SRG_BORDER}` }
                     },
                       React.createElement("td", {
@@ -1035,6 +1097,7 @@
                         else if (c === "NS") { bgC = SRG_DARK; fgC = "white"; }
                         else if (c === "FIA" || c === "DIP") { bgC = "#DCFCE7"; fgC = "#166534"; }
                         else if (c === "FOP" || c === "FOA" || c === "DOP") { bgC = "#FEF3C7"; fgC = "#92400E"; }
+
                         return React.createElement("td", {
                           key: ci,
                           style: {
@@ -1058,7 +1121,243 @@
               style: { marginTop: 16, padding: 14, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 11, color: SRG_GREY, border: `1px solid ${SRG_BORDER}` }
             },
               React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Shift Codes: "),
-              "DS = Day Shift, NS = Night Shift, FIA = Fly In AM, FOP = Fly Out PM, FOA = Fly Out AM, DIP = Drive In PM, DOP = Drive Out PM. Roster as supplied by Covalent shutdown team. Source of truth: Covalent Shutdown Roster.xlsx."
+              "DS = Day Shift, NS = Night Shift, FIA = Fly In AM, FOP = Fly Out PM, FOA = Fly Out AM, DIP = Drive In PM, DOP = Drive Out PM. Roster is maintained separately from workforce profiles using personId links to avoid manual duplication."
+            )
+          ),
+
+          tab === "print" && React.createElement(React.Fragment, null,
+            React.createElement("div", {
+              style: {
+                background: "white",
+                border: `1px solid ${SRG_BORDER}`,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                padding: 28
+              }
+            },
+
+              React.createElement("div", {
+                style: {
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 24,
+                  marginBottom: 24,
+                  flexWrap: "wrap"
+                }
+              },
+                React.createElement("div", null,
+                  React.createElement("div", {
+                    style: {
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: SRG_RED,
+                      letterSpacing: 1.2,
+                      textTransform: "uppercase"
+                    }
+                  }, "Client Summary"),
+                  React.createElement("div", {
+                    style: {
+                      fontSize: 26,
+                      fontWeight: 800,
+                      color: SRG_DARK,
+                      lineHeight: 1.15,
+                      marginTop: 4
+                    }
+                  }, "Covalent Lithium — Shutdown Workforce Summary"),
+                  React.createElement("div", {
+                    style: { fontSize: 13, color: SRG_GREY, marginTop: 4 }
+                  }, "Mt Holland · April–May 2026")
+                ),
+                React.createElement("button", {
+                  onClick: () => window.print(),
+                  style: {
+                    padding: "10px 16px",
+                    border: `1px solid ${SRG_DARK}`,
+                    background: "white",
+                    color: SRG_DARK,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.6
+                  }
+                }, "Print / Save PDF")
+              ),
+
+              React.createElement("div", {
+                style: {
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                  gap: 12,
+                  marginBottom: 24
+                }
+              },
+                React.createElement(Card, { label: "Planned Workforce", value: PEOPLE.length, sub: "Core planned positions" }),
+                React.createElement(Card, { label: "Confirmed Workforce", value: namedPeople.length, sub: "Named personnel only" }),
+                React.createElement(Card, { label: "Open Positions", value: tbcPeople.length, sub: "Still to be confirmed" }),
+                React.createElement(Card, { label: "Contingency Depth", value: contingencyTotal, sub: "Separate backup workforce" })
+              ),
+
+              React.createElement("div", {
+                style: {
+                  display: "grid",
+                  gridTemplateColumns: "1.1fr 0.9fr",
+                  gap: 20,
+                  marginBottom: 24
+                }
+              },
+
+                React.createElement("div", {
+                  style: { border: `1px solid ${SRG_BORDER}`, padding: 18 }
+                },
+                  React.createElement("div", {
+                    style: {
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: SRG_GREY,
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                      marginBottom: 12
+                    }
+                  }, "By-Trade Summary"),
+                  React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 11 } },
+                    React.createElement("thead", null,
+                      React.createElement("tr", { style: { borderBottom: `1px solid ${SRG_BORDER}` } },
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700 } }, "Trade"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Planned"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Confirmed"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Gap"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Cont."),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700 } }, "Readiness")
+                      )
+                    ),
+                    React.createElement("tbody", null,
+                      byTradeSummary.map((r, i) =>
+                        React.createElement("tr", {
+                          key: r.group,
+                          style: {
+                            borderBottom: `1px solid ${SRG_BORDER}`,
+                            background: i % 2 === 0 ? "white" : "#FAFAFA"
+                          }
+                        },
+                          React.createElement("td", { style: { padding: "8px 6px", fontWeight: 700 } }, r.group),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center" } }, r.planned),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center" } }, r.confirmed),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center", color: r.gap > 0 ? RH : SRG_DARK, fontWeight: 700 } }, r.gap),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center" } }, r.contingency || "–"),
+                          React.createElement("td", { style: { padding: "8px 6px" } }, React.createElement(StatusBadge, { text: r.readiness, color: r.readinessColor }))
+                        )
+                      )
+                    )
+                  )
+                ),
+
+                React.createElement("div", {
+                  style: { border: `1px solid ${SRG_BORDER}`, padding: 18 }
+                },
+                  React.createElement("div", {
+                    style: {
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: SRG_GREY,
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                      marginBottom: 12
+                    }
+                  }, "Critical Roles"),
+                  React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 11 } },
+                    React.createElement("thead", null,
+                      React.createElement("tr", { style: { borderBottom: `1px solid ${SRG_BORDER}` } },
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700 } }, "Role"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Planned"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Confirmed"),
+                        React.createElement("th", { style: { padding: "8px 6px", textAlign: "center", fontWeight: 700 } }, "Gap")
+                      )
+                    ),
+                    React.createElement("tbody", null,
+                      criticalRoles.map((r, i) =>
+                        React.createElement("tr", {
+                          key: r.role,
+                          style: {
+                            borderBottom: `1px solid ${SRG_BORDER}`,
+                            background: i % 2 === 0 ? "white" : "#FAFAFA"
+                          }
+                        },
+                          React.createElement("td", { style: { padding: "8px 6px", fontWeight: 700 } }, r.role),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center" } }, r.planned),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center" } }, r.confirmed),
+                          React.createElement("td", { style: { padding: "8px 6px", textAlign: "center", color: r.gap > 0 ? RH : SRG_DARK, fontWeight: 700 } }, r.gap)
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+
+              React.createElement("div", {
+                style: { border: `1px solid ${SRG_BORDER}`, padding: 18, marginBottom: 20 }
+              },
+                React.createElement("div", {
+                  style: {
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: SRG_GREY,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    marginBottom: 12
+                  }
+                }, "Key Risks & Mitigations"),
+                React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 11 } },
+                  React.createElement("thead", null,
+                    React.createElement("tr", { style: { borderBottom: `1px solid ${SRG_BORDER}` } },
+                      React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700, width: 70 } }, "Level"),
+                      React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700, width: 140 } }, "Trade Group"),
+                      React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700 } }, "Issue"),
+                      React.createElement("th", { style: { padding: "8px 6px", textAlign: "left", fontWeight: 700 } }, "Mitigation")
+                    )
+                  ),
+                  React.createElement("tbody", null,
+                    printRisks.map((r, i) =>
+                      React.createElement("tr", {
+                        key: i,
+                        style: {
+                          borderBottom: `1px solid ${SRG_BORDER}`,
+                          background: i % 2 === 0 ? "white" : "#FAFAFA"
+                        }
+                      },
+                        React.createElement("td", { style: { padding: "8px 6px" } }, React.createElement(RiskBadge, { level: r.level })),
+                        React.createElement("td", { style: { padding: "8px 6px", fontWeight: 700 } }, r.group),
+                        React.createElement("td", { style: { padding: "8px 6px" } }, r.issue),
+                        React.createElement("td", { style: { padding: "8px 6px", color: SRG_GREY } }, r.action)
+                      )
+                    )
+                  )
+                )
+              ),
+
+              React.createElement("div", {
+                style: {
+                  border: `1px solid ${SRG_BORDER}`,
+                  padding: 18,
+                  fontSize: 11,
+                  color: SRG_GREY,
+                  lineHeight: 1.5
+                }
+              },
+                React.createElement("div", {
+                  style: {
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: SRG_GREY,
+                    textTransform: "uppercase",
+                    letterSpacing: 1,
+                    marginBottom: 10
+                  }
+                }, "Summary Notes"),
+                React.createElement("div", null,
+                  "This summary separates planned workforce from contingency depth. Contingency is shown for delivery confidence but excluded from confirmed workforce, fulfilment and risk logic. Readiness is assessed by trade based on confirmed personnel, open gaps and backup depth."
+                )
+              )
             )
           ),
 
@@ -1084,8 +1383,7 @@
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(App));
+    ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
   </script>
 </body>
 </html>
