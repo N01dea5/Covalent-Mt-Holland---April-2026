@@ -68,16 +68,26 @@
     const RL = "#16A34A";
 
     const CONTINGENCY = {
-      total: 33,
-      srg: 6,
-      labourHire: 27
+      total: 29,
+      byGroup: {
+        "Leadership": 0,
+        "HSE": 0,
+        "Boilermaker": 3,
+        "Electrical": 1,
+        "Fitter": 12,
+        "Inspections": 0,
+        "Rigger": 3,
+        "Roller Crew": 4,
+        "Lube Tech": 0,
+        "Trade Assistant": 6
+      }
     };
 
     const E = [
       {id:1,name:"Adam Riley",role:"Superintendent",shift:"Day",days:10,group:"Leadership",ty:15,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Experienced shutdown superintendent with extensive Kwinana industrial leadership across chemical, refinery and processing environments. Proven capability managing large multi-discipline crews through complex shutdowns."},
       {id:2,name:"Lewis Newell",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Int",gta:false,fa:true,sum:"Mechanical supervisor with SRG Global since 2024, leading crews across Tronox, CSBP and Kleenheat shutdowns — all Major Hazard Facilities. Intermediate rigger. Currently completing Business degree. Strong emerging leader with direct Kwinana MHF experience."},
       {id:3,name:"Peter Burns",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:30,sy:20,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Dual-trade boilermaker/sheetmetal worker with 30 years in the trade and 10+ years as mechanical supervisor. Extensive Pilbara shutdown experience across BHP, FMG, Rio Tinto. CSBP sodium cyanide plant shutdown experience. HR licence holder."},
-      {id:4,name:"Christopher McLennan",role:"Supervisor DS",shift:"Day",days:7,group:"Leadership",ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,sum:"Mechanical supervisor with 11 years at Aerison Site Services leading projects and mine site shutdowns, plus 3.5 years as Project Supervisor at Monadelphous supervising maintenance teams, client liaison, HSE interactions and daily prestarts. Trade-qualified boilermaker with Cert IV Frontline Management, Section 44 Appointed Person, Working at Heights, Gas Test Atmospheres, LF forklift, EWP and Confined Space Entry."},
+      {id:4,name:"TBC",role:"Supervisor DS",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Pre Shut Crew supervisor — position to be confirmed."},
       {id:55,name:"TBC",role:"Supervisor Elec",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Electrical supervisor — position to be confirmed."},
       {id:56,name:"Mark Sullivan",role:"Supervisor NS",shift:"Night",days:8,group:"Leadership",ty:11,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Trade-qualified mechanical fitter with 11 years experience. Shutdown supervisor and leading hand across BHP, FMG, Karara. Pump specialist background with National Pumps & Energy. Reliable nightshift leader."},
       {id:57,name:"Jordan Kirkby",role:"Supervisor NS",shift:"Night",days:6,group:"Leadership",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Night shift supervisor — resume to be provided. Experience details to be confirmed with operations."},
@@ -195,7 +205,7 @@
       {name:"Adam Riley",role:"Superintendent",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Lewis Newell",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Peter Burns",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Christopher McLennan",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"TBC",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"TBC",role:"Supervisor Elec",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
       {name:"Mark Sullivan",role:"Supervisor NS",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
       {name:"Jordan Kirkby",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
@@ -258,10 +268,11 @@
         tc[t.label] = E.filter(e => t.key === "rig" ? !!e[t.key] : e[t.key]).length;
       });
 
-      const rgd = GROUP_ORDER.filter(g => E.some(e => e.group === g)).map(g => ({
+      const rgd = GROUP_ORDER.filter(g => E.some(e => e.group === g) || (CONTINGENCY.byGroup[g] || 0) > 0).map(g => ({
         name: g,
         filled: E.filter(e => e.group === g && !e.name.startsWith("TBC")).length,
-        tbc: E.filter(e => e.group === g && e.name.startsWith("TBC")).length
+        tbc: E.filter(e => e.group === g && e.name.startsWith("TBC")).length,
+        contingency: CONTINGENCY.byGroup[g] || 0
       }));
 
       const sd = [
@@ -450,12 +461,12 @@
               React.createElement(SC, { label: "Avg Trade Experience", value: `${aT} yrs`, sub: "Named personnel only" }),
               React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" }),
               React.createElement(SC, { label: "Fulfilment Rate", value: `${Math.round(tN / E.length * 100)}%`, sub: `${tT} positions to fill` }),
-              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: `${CONTINGENCY.srg} SRG · ${CONTINGENCY.labourHire} labour hire` })
+              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: "Shown separately from planned workforce" })
             ),
 
             React.createElement("div", {
               style: { marginTop: -8, marginBottom: 24, fontSize: 11, color: SRG_GREY, fontStyle: "italic" }
-            }, "Contingency depth shown separately and excluded from planned workforce, fulfilment and risk calculations."),
+            }, "Contingency is shown separately in headcount summary and trade-group manning only. It is excluded from planned workforce, fulfilment and risk calculations."),
 
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }
@@ -481,6 +492,7 @@
                     React.createElement(Tooltip, { cursor: { fill: "#F5F5F5" } }),
                     React.createElement(Bar, { dataKey: "filled", name: "Confirmed", fill: SRG_DARK, stackId: "a" }),
                     React.createElement(Bar, { dataKey: "tbc", name: "TBC", fill: SRG_RED, stackId: "a" }),
+                    React.createElement(Bar, { dataKey: "contingency", name: "Contingency", fill: "#9CA3AF", stackId: "b" }),
                     React.createElement(Legend, { wrapperStyle: { fontSize: 11, paddingTop: 8 } })
                   )
                 )
