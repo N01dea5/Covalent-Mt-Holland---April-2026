@@ -1,17 +1,21 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SRG Global — Covalent Shutdown Workforce Dashboard</title>
-  <link
-    rel="icon"
-    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23C8102E'/><text x='16' y='23' font-size='20' font-weight='bold' text-anchor='middle' fill='white'>S</text></svg>"
-  />
+  <link rel="icon" href="https://srgglobal.com.au/wp-content/uploads/2022/08/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
+
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.16/Recharts.js"></script>
 
   <script>
@@ -27,7 +31,6 @@
         "<p>Loaded: React=" + typeof React +
         ", ReactDOM=" + typeof ReactDOM +
         ", Recharts=" + typeof Recharts +
-        ", Babel=" + typeof Babel +
         "</p></div>";
     });
   </script>
@@ -35,14 +38,20 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: #F1F5F9;
-      color: #1B2A4A;
+      font-family: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: #F5F5F5;
+      color: #1A1A1A;
+      -webkit-font-smoothing: antialiased;
     }
-    ::-webkit-scrollbar { height: 6px; width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 3px; }
-    ::-webkit-scrollbar-track { background: #E2E8F0; }
+    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar-thumb { background: #B0B0B0; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #888; }
+    ::-webkit-scrollbar-track { background: #E8E8E8; }
+    button { font-family: inherit; }
+    select { font-family: inherit; }
+    table { font-family: inherit; }
   </style>
+
 </head>
 <body>
   <div id="root"></div>
@@ -53,6 +62,16 @@
       BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
       PieChart, Pie, Cell, ResponsiveContainer, Legend
     } = Recharts;
+
+    // SRG brand colours (from srgglobal.com.au)
+    const SRG_RED = "#E30613";
+    const SRG_DARK = "#1A1A1A";
+    const SRG_GREY = "#595959";
+    const SRG_LIGHT = "#F5F5F5";
+    const SRG_BORDER = "#E5E5E5";
+    const RH = "#DC2626";
+    const RM = "#F59E0B";
+    const RL = "#16A34A";
 
     const E = [
       {id:1,name:"Adam Riley",role:"Superintendent",shift:"Day",days:10,group:"Leadership",ty:15,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Experienced shutdown superintendent with extensive Kwinana industrial leadership across chemical, refinery and processing environments. Proven capability managing large multi-discipline crews through complex shutdowns."},
@@ -120,11 +139,73 @@
       {id:30,name:"TBC",role:"Bus Driver",shift:"Day",days:9,group:"Trade Assistant",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Bus driver — position to be confirmed."}
     ];
 
-    const C = "#C8102E";
-    const D = "#1B2A4A";
-    const RH = "#DC2626";
-    const RM = "#F59E0B";
-    const RL = "#16A34A";
+    const DATES = ["17 Apr","18 Apr","19 Apr","20 Apr","21 Apr","22 Apr","23 Apr","24 Apr","25 Apr","26 Apr","27 Apr","28 Apr","29 Apr","30 Apr","01 May","02 May","03 May","04 May"];
+    const DOW = ["Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun","Mon"];
+
+    const ROSTER = [
+      {name:"Ben Attack",role:"Boilermaker",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Brendan Hillman",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Arron Nairn",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"William Robinson",role:"Boilermaker",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"TBC",role:"Bus Driver",notes:"",codes:["","","","DIP","DS","DS","DS","DS","DS","DS","DS","DS","DS","DOP","","","",""]},
+      {name:"Nitin Mahamuni",role:"Coded Welder",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"TBC",role:"Coordinator",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"TBC",role:"Electrician",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
+      {name:"Benjamin Chopping",role:"Electrician",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
+      {name:"James Mahoney",role:"Electrician",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
+      {name:"Drew Brand",role:"Electrician",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
+      {name:"Mitya Dobbelaere",role:"Fitter",notes:"Pre Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Malcolm Grainger-Rousseau",role:"Fitter",notes:"Pre Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Russell Phillips",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Darren James",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Jake Gangemi",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Ben Friedauer",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Walid Boulahdid",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Oliver Kyle",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Omkar Dorugade",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Herbert Mukunga",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Ganesh Mohite",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Jordi Patino Roca",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Gurshwinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Kulvinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Abdikadir Mohamed",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Jamie Adams",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Omar Anadif",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Clemens Schaaf",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"TBC",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
+      {name:"Timo Gronenberg",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
+      {name:"Gerry Uy",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Samuel Gunn",role:"Fitter - Conveyor Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Amit Gund",role:"Fitter - Inspections",notes:"Inspections",codes:["","","","","","FIA","DS","DS","DS","DS","DS","FOA","","","","","",""]},
+      {name:"Armand Loupias",role:"Fitter - Inspections",notes:"Inspections",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Jacinta Jeffery",role:"HSE",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","","",""]},
+      {name:"Pare Te Nahu",role:"HSE",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","FOA","","","","",""]},
+      {name:"Stefanos Karikis",role:"Roller Tech",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Sebastien Djaffer",role:"Lube Tech T/A",notes:"Lube Team 1 D/S Only",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Mehdi Mokeddem",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Lakshman Vasanthan",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Joe Dack",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Darren Taylor",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Ricky Truslove",role:"Rigger Advanced",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Chaeyoon Kim",role:"Rigger Advanced",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"TBC",role:"Roller Crew Supervisor",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"King Garcia",role:"Roller Tech",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Jeremy Larock",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Henri Martins",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Adam Riley",role:"Superintendent",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Lewis Newell",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Peter Burns",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"TBC",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"TBC",role:"Supervisor Elec",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
+      {name:"Mark Sullivan",role:"Supervisor NS",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Jordan Kirkby",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"TBC",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Mehdi Bendani",role:"T.A. (Sentry)",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Madeline Jones",role:"T.A. (Sentry)",notes:"Post Shut - Must have LF VOC",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Federico Sarti",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Lea Mondesir",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
+      {name:"Ellie Jeon",role:"T.A. Telehandler",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]}
+    ];
 
     const TC = [
       { key: "cse", label: "CSE" },
@@ -138,6 +219,9 @@
       { key: "gta", label: "GTA" },
       { key: "fa", label: "FA" }
     ];
+
+    // Map roster group abbreviations to the employee group keys used in E
+    const GROUP_ORDER = ["Leadership","HSE","Boilermaker","Electrical","Fitter","Inspections","Rigger","Roller Crew","Lube Tech","Trade Assistant"];
 
     function App() {
       const [tab, setTab] = useState("profile");
@@ -173,7 +257,7 @@
         tc[t.label] = E.filter(e => t.key === "rig" ? !!e[t.key] : e[t.key]).length;
       });
 
-      const rgd = groups.map(g => ({
+      const rgd = GROUP_ORDER.filter(g => E.some(e => e.group === g)).map(g => ({
         name: g,
         filled: E.filter(e => e.group === g && !e.name.startsWith("TBC")).length,
         tbc: E.filter(e => e.group === g && e.name.startsWith("TBC")).length
@@ -195,56 +279,26 @@
             const tbc = crew.filter(e => e.name.startsWith("TBC"));
 
             if (tbc.length) {
-              r.push({
-                group: g,
-                shift: s,
-                level: "HIGH",
-                issue: `${tbc.length} unfilled position(s)`,
-                action: "Source and confirm personnel before shutdown mobilisation."
-              });
+              r.push({ group: g, shift: s, level: "HIGH", issue: `${tbc.length} unfilled position(s)`, action: "Source and confirm personnel before shutdown mobilisation." });
             }
 
             named.forEach(e => {
               if (e.sy < 1 && e.ty > 0) {
-                r.push({
-                  group: g,
-                  shift: s,
-                  level: "MED",
-                  issue: `${e.name} — limited shutdown experience`,
-                  action: "Pair with experienced worker for initial shifts. Do not assign to isolated or critical path tasks without direct oversight."
-                });
+                r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — limited shutdown experience`, action: "Pair with experienced worker for initial shifts. Do not assign to isolated or critical path tasks without direct oversight." });
               }
             });
 
             if (["Fitter", "Trade Assistant", "Roller Crew"].includes(g) && !named.some(e => e.tele) && named.length > 0) {
-              r.push({
-                group: g,
-                shift: s,
-                level: "LOW",
-                issue: "No telehandler ticket holder in group",
-                action: "Confirm telehandler access from adjacent crew or source ticket holder."
-              });
+              r.push({ group: g, shift: s, level: "LOW", issue: "No telehandler ticket holder in group", action: "Confirm telehandler access from adjacent crew or source ticket holder." });
             }
 
             if (!named.some(e => e.gta) && named.length > 2 && ["Fitter", "Boilermaker"].includes(g)) {
-              r.push({
-                group: g,
-                shift: s,
-                level: "LOW",
-                issue: "No gas testing ticket holder in group",
-                action: "Confirm GTA coverage from HSE or adjacent crew for confined space/hot work entries."
-              });
+              r.push({ group: g, shift: s, level: "LOW", issue: "No gas testing ticket holder in group", action: "Confirm GTA coverage from HSE or adjacent crew for confined space/hot work entries." });
             }
 
             named.forEach(e => {
               if (e.sum.includes("resume to be provided")) {
-                r.push({
-                  group: g,
-                  shift: s,
-                  level: "MED",
-                  issue: `${e.name} — resume not yet received`,
-                  action: "Obtain and review resume before mobilisation to verify competency."
-                });
+                r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — resume not yet received`, action: "Obtain and review resume before mobilisation to verify competency." });
               }
             });
           });
@@ -256,248 +310,240 @@
       const ranked = useMemo(() => {
         const r = {};
         groups.forEach(g => {
-          r[g] = E
-            .filter(e => e.group === g && !e.name.startsWith("TBC"))
+          r[g] = E.filter(e => e.group === g && !e.name.startsWith("TBC"))
             .sort((a, b) => (b.ty + b.sy * 2) - (a.ty + a.sy * 2));
         });
         return r;
       }, []);
 
+      // Card component — white background, red accent bar on left
       const SC = ({ label, value, sub }) =>
-        React.createElement(
-          "div",
-          {
-            style: {
-              background: "white",
-              borderRadius: 8,
-              padding: "16px 20px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              borderLeft: `4px solid ${C}`
-            }
-          },
-          React.createElement("div", { style: { fontSize: 28, fontWeight: 700, color: D } }, value),
-          React.createElement("div", { style: { fontSize: 13, fontWeight: 600, color: "#64748B", marginTop: 2 } }, label),
-          sub && React.createElement("div", { style: { fontSize: 11, color: "#94A3B8", marginTop: 2 } }, sub)
+        React.createElement("div", {
+          style: {
+            background: "white",
+            borderLeft: `3px solid ${SRG_RED}`,
+            padding: "18px 22px",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
+          }
+        },
+          React.createElement("div", { style: { fontSize: 30, fontWeight: 800, color: SRG_DARK, lineHeight: 1.1 } }, value),
+          React.createElement("div", { style: { fontSize: 12, fontWeight: 600, color: SRG_GREY, marginTop: 4, textTransform: "uppercase", letterSpacing: 0.5 } }, label),
+          sub && React.createElement("div", { style: { fontSize: 11, color: "#8C8C8C", marginTop: 3 } }, sub)
         );
 
       const RB = ({ level }) =>
-        React.createElement(
-          "span",
-          {
-            style: {
-              display: "inline-block",
-              padding: "2px 10px",
-              borderRadius: 99,
-              fontSize: 11,
-              fontWeight: 700,
-              color: "white",
-              background: level === "HIGH" ? RH : level === "MED" ? RM : RL
-            }
-          },
-          level
-        );
-
-      return React.createElement(
-        "div",
-        {
+        React.createElement("span", {
           style: {
-            fontFamily: "'Segoe UI',system-ui,sans-serif",
-            background: "#F1F5F9",
-            minHeight: "100vh",
-            color: D
+            display: "inline-block",
+            padding: "3px 10px",
+            fontSize: 10,
+            fontWeight: 700,
+            color: "white",
+            background: level === "HIGH" ? RH : level === "MED" ? RM : RL,
+            letterSpacing: 0.5
+          }
+        }, level);
+
+      const TabBtn = ({ id, label }) =>
+        React.createElement("button", {
+          onClick: () => setTab(id),
+          style: {
+            padding: "12px 24px",
+            border: "none",
+            borderBottom: tab === id ? `3px solid ${SRG_RED}` : "3px solid transparent",
+            background: "transparent",
+            cursor: "pointer",
+            fontWeight: tab === id ? 700 : 600,
+            fontSize: 13,
+            color: tab === id ? SRG_DARK : SRG_GREY,
+            textTransform: "uppercase",
+            letterSpacing: 0.8,
+            transition: "all .15s"
+          }
+        }, label);
+
+      return React.createElement("div", {
+        style: {
+          fontFamily: "'Source Sans 3','Segoe UI',system-ui,sans-serif",
+          background: SRG_LIGHT,
+          minHeight: "100vh",
+          color: SRG_DARK
+        }
+      },
+        // HEADER BAR — white, logo left, title centre, SRG-styled
+        React.createElement("div", {
+          style: {
+            background: "white",
+            borderBottom: `1px solid ${SRG_BORDER}`,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04)"
           }
         },
-
-        React.createElement(
-          "div",
-          {
+          React.createElement("div", {
             style: {
-              background: `linear-gradient(135deg, ${D} 0%, #2D3F63 100%)`,
-              padding: "24px 32px",
+              maxWidth: 1440,
+              margin: "0 auto",
+              padding: "20px 32px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 16
+              gap: 24,
+              flexWrap: "wrap"
             }
           },
-          React.createElement(
-            "div",
-            null,
-            React.createElement(
-              "div",
-              {
+            // SRG Logo
+            React.createElement("img", {
+              src: "https://srgglobal.com.au/wp-content/uploads/2022/08/SRGG-L-01.svg",
+              alt: "SRG Global",
+              style: { height: 44, width: "auto", flexShrink: 0 },
+              onError: function(e) {
+                // Fallback to business news logo if SVG fails to load
+                e.target.onerror = null;
+                e.target.src = "https://www.businessnews.com.au/sites/default/files/bn-di-company/SRGG-logo.png";
+              }
+            }),
+            // Divider
+            React.createElement("div", { style: { width: 1, height: 40, background: SRG_BORDER, flexShrink: 0 } }),
+            // Title block
+            React.createElement("div", { style: { flex: 1, minWidth: 280 } },
+              React.createElement("div", {
                 style: {
-                  color: "white",
                   fontSize: 10,
                   fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  opacity: 0.7
+                  color: SRG_RED,
+                  letterSpacing: 1.5,
+                  textTransform: "uppercase"
                 }
-              },
-              "SRG Global Integrated Services"
-            ),
-            React.createElement(
-              "div",
-              { style: { color: "white", fontSize: 22, fontWeight: 700, marginTop: 4 } },
-              "Covalent Lithium — Shutdown Workforce Dashboard"
-            ),
-            React.createElement(
-              "div",
-              { style: { color: "rgba(255,255,255,.6)", fontSize: 13, marginTop: 4 } },
-              `Mt Holland · April–May 2026 · ${E.length} Positions`
+              }, "Asset Maintenance · Integrated Services"),
+              React.createElement("div", {
+                style: { fontSize: 22, fontWeight: 800, color: SRG_DARK, marginTop: 2, lineHeight: 1.2 }
+              }, "Covalent Lithium — Workforce Dashboard"),
+              React.createElement("div", {
+                style: { fontSize: 12, color: SRG_GREY, marginTop: 2 }
+              }, `Mt Holland · April–May 2026 · ${E.length} Positions`)
             )
           ),
-          React.createElement(
-            "div",
-            { style: { display: "flex", gap: 8 } },
-            React.createElement(
-              "button",
-              {
-                onClick: () => setTab("profile"),
-                style: {
-                  padding: "8px 20px",
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  background: tab === "profile" ? C : "rgba(255,255,255,.15)",
-                  color: "white"
-                }
-              },
-              "Workforce Profile"
-            ),
-            React.createElement(
-              "button",
-              {
-                onClick: () => setTab("risk"),
-                style: {
-                  padding: "8px 20px",
-                  borderRadius: 6,
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  background: tab === "risk" ? C : "rgba(255,255,255,.15)",
-                  color: "white"
-                }
-              },
-              "Risk Assessment"
-            )
+          // Tab bar
+          React.createElement("div", {
+            style: {
+              maxWidth: 1440,
+              margin: "0 auto",
+              padding: "0 32px",
+              display: "flex",
+              gap: 4,
+              borderTop: `1px solid ${SRG_BORDER}`
+            }
+          },
+            React.createElement(TabBtn, { id: "profile", label: "Workforce Profile" }),
+            React.createElement(TabBtn, { id: "risk", label: "Risk Assessment" }),
+            React.createElement(TabBtn, { id: "roster", label: "Shutdown Roster" })
           )
         ),
 
-        React.createElement(
-          "div",
-          { style: { maxWidth: 1440, margin: "0 auto", padding: "24px 20px" } },
+        React.createElement("div", { style: { maxWidth: 1440, margin: "0 auto", padding: "24px 32px" } },
 
-          tab === "profile" && React.createElement(
-            React.Fragment,
-            null,
+          // ====== PROFILE TAB ======
+          tab === "profile" && React.createElement(React.Fragment, null,
 
-            React.createElement(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
-                  gap: 12,
-                  marginBottom: 24
-                }
-              },
+            React.createElement("div", {
+              style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
+            },
               React.createElement(SC, { label: "Total Positions", value: E.length, sub: `${tN} confirmed · ${tT} TBC` }),
               React.createElement(SC, { label: "Avg Trade Experience", value: `${aT} yrs`, sub: "Named personnel only" }),
               React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" }),
               React.createElement(SC, { label: "Fulfilment Rate", value: `${Math.round(tN / E.length * 100)}%`, sub: `${tT} positions to fill` })
             ),
 
-            React.createElement(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: 16,
-                  marginBottom: 24
-                }
+            React.createElement("div", {
+              style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }
+            },
+              // Manning by Trade Group chart
+              React.createElement("div", {
+                style: { background: "white", padding: 24, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}` }
               },
-
-              React.createElement(
-                "div",
-                { style: { background: "white", borderRadius: 8, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" } },
-                React.createElement("div", { style: { fontSize: 14, fontWeight: 700, marginBottom: 12 } }, "Manning by Trade Group"),
-                React.createElement(
-                  ResponsiveContainer,
-                  { width: "100%", height: 220 },
-                  React.createElement(
-                    BarChart,
-                    { data: rgd, margin: { top: 5, right: 5, left: -10, bottom: 5 } },
-                    React.createElement(CartesianGrid, { strokeDasharray: "3 3", stroke: "#E2E8F0" }),
-                    React.createElement(XAxis, { dataKey: "name", tick: { fontSize: 10 }, angle: -30, textAnchor: "end", height: 60 }),
-                    React.createElement(YAxis, { tick: { fontSize: 11 } }),
-                    React.createElement(Tooltip, null),
-                    React.createElement(Bar, { dataKey: "filled", name: "Confirmed", fill: D, radius: [3, 3, 0, 0] }),
-                    React.createElement(Bar, { dataKey: "tbc", name: "TBC", fill: RM, radius: [3, 3, 0, 0] }),
-                    React.createElement(Legend, { wrapperStyle: { fontSize: 11 } })
+                React.createElement("div", {
+                  style: { fontSize: 11, fontWeight: 700, marginBottom: 16, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 1 }
+                }, "Manning by Trade Group"),
+                React.createElement(ResponsiveContainer, { width: "100%", height: 260 },
+                  React.createElement(BarChart, { data: rgd, margin: { top: 5, right: 5, left: -15, bottom: 50 } },
+                    React.createElement(CartesianGrid, { strokeDasharray: "3 3", stroke: "#EEE", vertical: false }),
+                    React.createElement(XAxis, {
+                      dataKey: "name",
+                      tick: { fontSize: 10, fill: SRG_GREY },
+                      angle: -35,
+                      textAnchor: "end",
+                      height: 70,
+                      interval: 0
+                    }),
+                    React.createElement(YAxis, { tick: { fontSize: 10, fill: SRG_GREY }, allowDecimals: false }),
+                    React.createElement(Tooltip, { cursor: { fill: "#F5F5F5" } }),
+                    React.createElement(Bar, { dataKey: "filled", name: "Confirmed", fill: SRG_DARK, stackId: "a" }),
+                    React.createElement(Bar, { dataKey: "tbc", name: "TBC", fill: SRG_RED, stackId: "a" }),
+                    React.createElement(Legend, { wrapperStyle: { fontSize: 11, paddingTop: 8 } })
                   )
                 )
               ),
-
-              React.createElement(
-                "div",
-                { style: { background: "white", borderRadius: 8, padding: 20, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" } },
-                React.createElement("div", { style: { fontSize: 14, fontWeight: 700, marginBottom: 12 } }, "Shift Distribution & Ticket Coverage"),
-                React.createElement(
-                  "div",
-                  { style: { display: "flex", gap: 20, alignItems: "center" } },
-
-                  React.createElement(
-                    ResponsiveContainer,
-                    { width: "40%", height: 180 },
-                    React.createElement(
-                      PieChart,
-                      null,
-                      React.createElement(
-                        Pie,
-                        {
+              // Shift Distribution + Ticket Coverage
+              React.createElement("div", {
+                style: { background: "white", padding: 24, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}` }
+              },
+                React.createElement("div", {
+                  style: { fontSize: 11, fontWeight: 700, marginBottom: 16, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 1 }
+                }, "Shift Distribution & Ticket Coverage"),
+                React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "center" } },
+                  // Pie with in-chart labels showing both name AND value
+                  React.createElement("div", { style: { width: "42%", display: "flex", flexDirection: "column", alignItems: "center" } },
+                    React.createElement(ResponsiveContainer, { width: "100%", height: 170 },
+                      React.createElement(PieChart, null,
+                        React.createElement(Pie, {
                           data: sd,
                           cx: "50%",
                           cy: "50%",
-                          innerRadius: 40,
-                          outerRadius: 70,
+                          innerRadius: 45,
+                          outerRadius: 72,
                           dataKey: "value",
-                          label: ({ name, value }) => `${name}: ${value}`,
-                          labelLine: false,
-                          style: { fontSize: 10 }
+                          label: false,
+                          labelLine: false
                         },
-                        sd.map((_, i) => React.createElement(Cell, { key: i, fill: i === 0 ? D : C }))
+                          sd.map((_, i) => React.createElement(Cell, { key: i, fill: i === 0 ? SRG_DARK : SRG_RED }))
+                        )
                       )
+                    ),
+                    // Custom legend below pie
+                    React.createElement("div", { style: { display: "flex", gap: 12, marginTop: 8, fontSize: 11 } },
+                      sd.map((s, i) => React.createElement("div", {
+                        key: i,
+                        style: { display: "flex", alignItems: "center", gap: 5 }
+                      },
+                        React.createElement("div", {
+                          style: { width: 10, height: 10, background: i === 0 ? SRG_DARK : SRG_RED }
+                        }),
+                        React.createElement("span", { style: { color: SRG_GREY, fontWeight: 600 } }, `${s.name}: ${s.value}`)
+                      ))
                     )
                   ),
-
-                  React.createElement(
-                    "div",
-                    { style: { flex: 1 } },
+                  // Ticket coverage bars
+                  React.createElement("div", { style: { flex: 1 } },
                     Object.entries(tc).map(([k, v]) =>
-                      React.createElement(
-                        "div",
-                        { key: k, style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 5 } },
-                        React.createElement("div", { style: { width: 36, fontSize: 10, fontWeight: 600, color: "#64748B" } }, k),
-                        React.createElement(
-                          "div",
-                          { style: { flex: 1, height: 12, background: "#E2E8F0", borderRadius: 7, overflow: "hidden" } },
+                      React.createElement("div", {
+                        key: k,
+                        style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }
+                      },
+                        React.createElement("div", {
+                          style: { width: 32, fontSize: 10, fontWeight: 600, color: SRG_GREY }
+                        }, k),
+                        React.createElement("div", {
+                          style: { flex: 1, height: 10, background: "#EEE", overflow: "hidden" }
+                        },
                           React.createElement("div", {
                             style: {
                               height: "100%",
                               width: `${v / E.length * 100}%`,
-                              background: v / E.length > 0.5 ? D : v / E.length > 0.25 ? RM : RH,
-                              borderRadius: 7
+                              background: v / E.length > 0.5 ? SRG_DARK : v / E.length > 0.25 ? RM : SRG_RED
                             }
                           })
                         ),
-                        React.createElement("div", { style: { fontSize: 10, fontWeight: 600, width: 28, textAlign: "right" } }, `${Math.round(v / E.length * 100)}%`)
+                        React.createElement("div", {
+                          style: { fontSize: 10, fontWeight: 700, width: 28, textAlign: "right", color: SRG_DARK }
+                        }, `${Math.round(v / E.length * 100)}%`)
                       )
                     )
                   )
@@ -505,55 +551,54 @@
               )
             ),
 
-            React.createElement(
-              "div",
-              { style: { display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap", alignItems: "center" } },
-              React.createElement("span", { style: { fontSize: 12, fontWeight: 700, color: "#64748B" } }, "FILTER:"),
-              React.createElement(
-                "select",
-                {
-                  value: fG,
-                  onChange: e => sfG(e.target.value),
-                  style: { padding: "6px 12px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }
-                },
+            // Filters
+            React.createElement("div", {
+              style: { display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }
+            },
+              React.createElement("span", {
+                style: { fontSize: 11, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8 }
+              }, "Filter:"),
+              React.createElement("select", {
+                value: fG,
+                onChange: e => sfG(e.target.value),
+                style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
+              },
                 React.createElement("option", { value: "All" }, "All Groups"),
                 groups.map(g => React.createElement("option", { key: g, value: g }, g))
               ),
-              React.createElement(
-                "select",
-                {
-                  value: fS,
-                  onChange: e => sfS(e.target.value),
-                  style: { padding: "6px 12px", borderRadius: 6, border: "1px solid #CBD5E1", fontSize: 12 }
-                },
+              React.createElement("select", {
+                value: fS,
+                onChange: e => sfS(e.target.value),
+                style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
+              },
                 React.createElement("option", { value: "All" }, "All Shifts"),
                 React.createElement("option", { value: "Day" }, "Day Shift"),
                 React.createElement("option", { value: "Night" }, "Night Shift")
               ),
-              fT.length > 0 && React.createElement(
-                "button",
-                {
-                  onClick: () => sfT([]),
-                  style: {
-                    padding: "5px 10px",
-                    borderRadius: 6,
-                    border: "1px solid #CBD5E1",
-                    fontSize: 11,
-                    cursor: "pointer",
-                    background: "#FEF2F2",
-                    color: RH,
-                    fontWeight: 600
-                  }
-                },
-                "Clear tickets ✕"
-              ),
-              React.createElement("span", { style: { fontSize: 12, color: "#94A3B8", marginLeft: "auto" } }, `${filtered.length} personnel shown`)
+              fT.length > 0 && React.createElement("button", {
+                onClick: () => sfT([]),
+                style: {
+                  padding: "6px 12px",
+                  border: `1px solid ${SRG_RED}`,
+                  fontSize: 11,
+                  cursor: "pointer",
+                  background: "white",
+                  color: SRG_RED,
+                  fontWeight: 600
+                }
+              }, "Clear tickets ✕"),
+              React.createElement("span", {
+                style: { fontSize: 11, color: SRG_GREY, marginLeft: "auto", fontWeight: 600 }
+              }, `${filtered.length} personnel shown`)
             ),
 
-            React.createElement(
-              "div",
-              { style: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap", alignItems: "center" } },
-              React.createElement("span", { style: { fontSize: 11, fontWeight: 600, color: "#94A3B8", marginRight: 4 } }, "TICKETS:"),
+            // Ticket filter pills
+            React.createElement("div", {
+              style: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }
+            },
+              React.createElement("span", {
+                style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, marginRight: 4, textTransform: "uppercase", letterSpacing: 0.8 }
+              }, "Tickets:"),
               [
                 { key: "cse", label: "CSE" },
                 { key: "wah", label: "WAH" },
@@ -567,86 +612,82 @@
                 { key: "fa", label: "First Aid" }
               ].map(t => {
                 const a = fT.includes(t.key);
-                return React.createElement(
-                  "button",
-                  {
-                    key: t.key,
-                    onClick: () => toggle(t.key),
-                    style: {
-                      padding: "4px 12px",
-                      borderRadius: 99,
-                      border: a ? `2px solid ${C}` : "1px solid #CBD5E1",
-                      cursor: "pointer",
-                      fontSize: 11,
-                      fontWeight: a ? 700 : 500,
-                      background: a ? C : "white",
-                      color: a ? "white" : "#475569"
-                    }
-                  },
-                  t.label + (a ? ` (${filtered.length})` : "")
-                );
+                return React.createElement("button", {
+                  key: t.key,
+                  onClick: () => toggle(t.key),
+                  style: {
+                    padding: "5px 12px",
+                    border: a ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    cursor: "pointer",
+                    fontSize: 11,
+                    fontWeight: a ? 700 : 500,
+                    background: a ? SRG_RED : "white",
+                    color: a ? "white" : SRG_DARK
+                  }
+                }, t.label + (a ? ` (${filtered.length})` : ""));
               })
             ),
 
-            React.createElement(
-              "div",
-              { style: { background: "white", borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", overflow: "auto" } },
-              React.createElement(
-                "table",
-                { style: { width: "100%", borderCollapse: "collapse", fontSize: 11 } },
-                React.createElement(
-                  "thead",
-                  null,
-                  React.createElement(
-                    "tr",
-                    { style: { background: D, color: "white" } },
-                    React.createElement("th", { style: { padding: "10px 10px", textAlign: "left", fontWeight: 600, position: "sticky", left: 0, background: D, zIndex: 1 } }, "Name"),
-                    React.createElement("th", { style: { padding: "10px 6px", textAlign: "left", fontWeight: 600 } }, "Role"),
-                    React.createElement("th", { style: { padding: "10px 6px", textAlign: "center", fontWeight: 600 } }, "Shift"),
-                    React.createElement("th", { style: { padding: "10px 4px", textAlign: "center", fontWeight: 600, fontSize: 9 } }, "Days"),
-                    React.createElement("th", { style: { padding: "10px 4px", textAlign: "center", fontWeight: 600, fontSize: 9 } }, React.createElement(React.Fragment, null, "Trade", React.createElement("br"), "Yrs")),
-                    React.createElement("th", { style: { padding: "10px 4px", textAlign: "center", fontWeight: 600, fontSize: 9 } }, React.createElement(React.Fragment, null, "S/D", React.createElement("br"), "Yrs")),
-                    TC.map(t => React.createElement("th", { key: t.key, style: { padding: "10px 3px", textAlign: "center", fontWeight: 600, fontSize: 8 } }, t.label)),
-                    React.createElement("th", { style: { padding: "10px 10px", textAlign: "left", fontWeight: 600, minWidth: 220 } }, "Summary")
+            // Employee table
+            React.createElement("div", {
+              style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "auto" }
+            },
+              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 11 } },
+                React.createElement("thead", null,
+                  React.createElement("tr", { style: { background: SRG_DARK, color: "white" } },
+                    React.createElement("th", { style: { padding: "12px 12px", textAlign: "left", fontWeight: 700, position: "sticky", left: 0, background: SRG_DARK, zIndex: 1, textTransform: "uppercase", fontSize: 10, letterSpacing: 0.5 } }, "Name"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "left", fontWeight: 700, textTransform: "uppercase", fontSize: 10, letterSpacing: 0.5 } }, "Role"),
+                    React.createElement("th", { style: { padding: "12px 6px", textAlign: "center", fontWeight: 700, textTransform: "uppercase", fontSize: 10, letterSpacing: 0.5 } }, "Shift"),
+                    React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, "Days"),
+                    React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, React.createElement(React.Fragment, null, "Trade", React.createElement("br"), "Yrs")),
+                    React.createElement("th", { style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" } }, React.createElement(React.Fragment, null, "S/D", React.createElement("br"), "Yrs")),
+                    TC.map(t => React.createElement("th", {
+                      key: t.key,
+                      style: { padding: "12px 4px", textAlign: "center", fontWeight: 700, fontSize: 9, textTransform: "uppercase" }
+                    }, t.label)),
+                    React.createElement("th", { style: { padding: "12px 12px", textAlign: "left", fontWeight: 700, minWidth: 240, textTransform: "uppercase", fontSize: 10, letterSpacing: 0.5 } }, "Summary")
                   )
                 ),
-                React.createElement(
-                  "tbody",
-                  null,
+                React.createElement("tbody", null,
                   filtered.map((e, i) => {
                     const isTBC = e.name.startsWith("TBC");
-                    const bg = isTBC ? "#FEF3C7" : i % 2 === 0 ? "#FAFBFC" : "white";
-                    return React.createElement(
-                      "tr",
-                      { key: e.id, style: { background: bg, borderBottom: "1px solid #E2E8F0" } },
-                      React.createElement("td", { style: { padding: "7px 10px", fontWeight: 600, color: isTBC ? RM : D, whiteSpace: "nowrap", position: "sticky", left: 0, background: bg, zIndex: 1 } }, e.name),
-                      React.createElement("td", { style: { padding: "7px 6px", color: "#475569", whiteSpace: "nowrap" } }, e.role),
-                      React.createElement(
-                        "td",
-                        { style: { padding: "7px 6px", textAlign: "center" } },
+                    const bg = isTBC ? "#FFF9E6" : i % 2 === 0 ? "#FAFAFA" : "white";
+                    return React.createElement("tr", {
+                      key: e.id,
+                      style: { background: bg, borderBottom: `1px solid ${SRG_BORDER}` }
+                    },
+                      React.createElement("td", {
+                        style: { padding: "9px 12px", fontWeight: 700, color: isTBC ? RM : SRG_DARK, whiteSpace: "nowrap", position: "sticky", left: 0, background: bg, zIndex: 1 }
+                      }, e.name),
+                      React.createElement("td", { style: { padding: "9px 8px", color: SRG_GREY, whiteSpace: "nowrap" } }, e.role),
+                      React.createElement("td", { style: { padding: "9px 6px", textAlign: "center" } },
                         React.createElement("span", {
                           style: {
-                            padding: "2px 7px",
-                            borderRadius: 99,
+                            padding: "3px 8px",
                             fontSize: 9,
-                            fontWeight: 600,
-                            background: e.shift === "Day" ? "#DBEAFE" : "#1E293B",
-                            color: e.shift === "Day" ? "#1E40AF" : "white"
+                            fontWeight: 700,
+                            background: e.shift === "Day" ? "#E8F0FE" : SRG_DARK,
+                            color: e.shift === "Day" ? "#1E40AF" : "white",
+                            textTransform: "uppercase",
+                            letterSpacing: 0.3
                           }
                         }, e.shift)
                       ),
-                      React.createElement("td", { style: { padding: "7px 4px", textAlign: "center", fontWeight: 600 } }, e.days),
-                      React.createElement("td", { style: { padding: "7px 4px", textAlign: "center", fontWeight: 600, color: e.ty >= 10 ? RL : e.ty >= 3 ? "#475569" : "#94A3B8" } }, e.ty || "–"),
-                      React.createElement("td", { style: { padding: "7px 4px", textAlign: "center", fontWeight: 600, color: e.sy >= 5 ? RL : e.sy >= 2 ? "#475569" : "#94A3B8" } }, e.sy || "–"),
+                      React.createElement("td", { style: { padding: "9px 4px", textAlign: "center", fontWeight: 700 } }, e.days),
+                      React.createElement("td", {
+                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: e.ty >= 10 ? RL : e.ty >= 3 ? SRG_DARK : "#B0B0B0" }
+                      }, e.ty || "–"),
+                      React.createElement("td", {
+                        style: { padding: "9px 4px", textAlign: "center", fontWeight: 700, color: e.sy >= 5 ? RL : e.sy >= 2 ? SRG_DARK : "#B0B0B0" }
+                      }, e.sy || "–"),
                       TC.map(t => {
                         const v = e[t.key];
-                        return React.createElement(
-                          "td",
-                          { key: t.key, style: { padding: "7px 3px", textAlign: "center", fontSize: t.key === "rig" ? 8 : 12, color: t.key === "rig" ? "#475569" : undefined } },
-                          t.key === "rig" ? (v || "") : (v ? "✓" : "")
-                        );
+                        return React.createElement("td", {
+                          key: t.key,
+                          style: { padding: "9px 4px", textAlign: "center", fontSize: t.key === "rig" ? 8 : 13, color: t.key === "rig" ? SRG_GREY : SRG_RED, fontWeight: t.key === "rig" ? 600 : 400 }
+                        }, t.key === "rig" ? (v || "") : (v ? "✓" : ""));
                       }),
-                      React.createElement("td", { style: { padding: "7px 10px", fontSize: 10, color: "#64748B", lineHeight: 1.4 } }, e.sum)
+                      React.createElement("td", { style: { padding: "9px 12px", fontSize: 11, color: SRG_GREY, lineHeight: 1.5 } }, e.sum)
                     );
                   })
                 )
@@ -654,154 +695,249 @@
             )
           ),
 
-          tab === "risk" && React.createElement(
-            React.Fragment,
-            null,
+          // ====== RISK TAB ======
+          tab === "risk" && React.createElement(React.Fragment, null,
 
-            React.createElement(
-              "div",
-              {
-                style: {
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
-                  gap: 12,
-                  marginBottom: 24
-                }
-              },
+            React.createElement("div", {
+              style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
+            },
               React.createElement(SC, { label: "Total Risks Identified", value: risks.length }),
               React.createElement(SC, { label: "High Risk", value: risks.filter(r => r.level === "HIGH").length, sub: "Unfilled positions" }),
               React.createElement(SC, { label: "Medium Risk", value: risks.filter(r => r.level === "MED").length, sub: "Experience / documentation gaps" }),
               React.createElement(SC, { label: "Low Risk", value: risks.filter(r => r.level === "LOW").length, sub: "Ticket coverage gaps" })
             ),
 
-            React.createElement(
-              "div",
-              { style: { background: "white", borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", overflow: "auto", marginBottom: 24 } },
-              React.createElement("div", { style: { padding: "16px 20px", borderBottom: `2px solid ${C}`, fontWeight: 700, fontSize: 15 } }, "Risk Register"),
-              React.createElement(
-                "table",
-                { style: { width: "100%", borderCollapse: "collapse", fontSize: 12 } },
-                React.createElement(
-                  "thead",
-                  null,
-                  React.createElement(
-                    "tr",
-                    { style: { background: "#F8FAFC" } },
-                    React.createElement("th", { style: { padding: "10px 12px", textAlign: "left", fontWeight: 600, width: 70 } }, "Level"),
-                    React.createElement("th", { style: { padding: "10px 8px", textAlign: "left", fontWeight: 600, width: 120 } }, "Trade Group"),
-                    React.createElement("th", { style: { padding: "10px 8px", textAlign: "center", fontWeight: 600, width: 70 } }, "Shift"),
-                    React.createElement("th", { style: { padding: "10px 12px", textAlign: "left", fontWeight: 600 } }, "Issue"),
-                    React.createElement("th", { style: { padding: "10px 12px", textAlign: "left", fontWeight: 600 } }, "Recommended Action")
+            React.createElement("div", {
+              style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "auto", marginBottom: 24 }
+            },
+              React.createElement("div", {
+                style: { padding: "18px 24px", borderBottom: `2px solid ${SRG_RED}`, fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 1, color: SRG_DARK }
+              }, "Risk Register"),
+              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 12 } },
+                React.createElement("thead", null,
+                  React.createElement("tr", { style: { background: "#FAFAFA", borderBottom: `1px solid ${SRG_BORDER}` } },
+                    React.createElement("th", { style: { padding: "12px", textAlign: "left", fontWeight: 700, width: 75, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Level"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "left", fontWeight: 700, width: 130, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Trade Group"),
+                    React.createElement("th", { style: { padding: "12px 8px", textAlign: "center", fontWeight: 700, width: 70, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Shift"),
+                    React.createElement("th", { style: { padding: "12px", textAlign: "left", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Issue"),
+                    React.createElement("th", { style: { padding: "12px", textAlign: "left", fontWeight: 700, textTransform: "uppercase", fontSize: 10, color: SRG_GREY, letterSpacing: 0.5 } }, "Recommended Action")
                   )
                 ),
-                React.createElement(
-                  "tbody",
-                  null,
+                React.createElement("tbody", null,
                   risks.map((r, i) =>
-                    React.createElement(
-                      "tr",
-                      {
-                        key: i,
-                        style: {
-                          borderBottom: "1px solid #E2E8F0",
-                          background: r.level === "HIGH" ? "#FEF2F2" : i % 2 === 0 ? "white" : "#FAFBFC"
-                        }
-                      },
-                      React.createElement("td", { style: { padding: "8px 12px" } }, React.createElement(RB, { level: r.level })),
-                      React.createElement("td", { style: { padding: "8px", fontWeight: 600 } }, r.group),
-                      React.createElement(
-                        "td",
-                        { style: { padding: "8px", textAlign: "center" } },
+                    React.createElement("tr", {
+                      key: i,
+                      style: {
+                        borderBottom: `1px solid ${SRG_BORDER}`,
+                        background: r.level === "HIGH" ? "#FEF2F2" : i % 2 === 0 ? "white" : "#FAFAFA"
+                      }
+                    },
+                      React.createElement("td", { style: { padding: "10px 12px" } }, React.createElement(RB, { level: r.level })),
+                      React.createElement("td", { style: { padding: "10px 8px", fontWeight: 700, color: SRG_DARK } }, r.group),
+                      React.createElement("td", { style: { padding: "10px 8px", textAlign: "center" } },
                         React.createElement("span", {
                           style: {
-                            padding: "2px 8px",
-                            borderRadius: 99,
+                            padding: "3px 8px",
                             fontSize: 10,
-                            fontWeight: 600,
-                            background: r.shift === "Day" ? "#DBEAFE" : "#1E293B",
-                            color: r.shift === "Day" ? "#1E40AF" : "white"
+                            fontWeight: 700,
+                            background: r.shift === "Day" ? "#E8F0FE" : SRG_DARK,
+                            color: r.shift === "Day" ? "#1E40AF" : "white",
+                            textTransform: "uppercase"
                           }
                         }, r.shift)
                       ),
-                      React.createElement("td", { style: { padding: "8px 12px", color: "#334155" } }, r.issue),
-                      React.createElement("td", { style: { padding: "8px 12px", color: "#64748B", fontSize: 11 } }, r.action)
+                      React.createElement("td", { style: { padding: "10px 12px", color: SRG_DARK } }, r.issue),
+                      React.createElement("td", { style: { padding: "10px 12px", color: SRG_GREY, fontSize: 11 } }, r.action)
                     )
                   )
                 )
               )
             ),
 
-            React.createElement("div", { style: { fontWeight: 700, fontSize: 15, marginBottom: 12 } }, "Experience Ranking by Trade Group"),
+            React.createElement("div", {
+              style: { fontWeight: 700, fontSize: 12, marginBottom: 12, textTransform: "uppercase", letterSpacing: 1, color: SRG_GREY }
+            }, "Experience Ranking by Trade Group"),
 
-            React.createElement(
-              "div",
-              { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(350px,1fr))", gap: 16 } },
-              groups
-                .filter(g => ranked[g] && ranked[g].length > 0)
-                .map(g =>
-                  React.createElement(
-                    "div",
-                    { key: g, style: { background: "white", borderRadius: 8, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", overflow: "hidden" } },
-                    React.createElement("div", { style: { padding: "12px 16px", background: D, color: "white", fontWeight: 700, fontSize: 13 } }, `${g} (${ranked[g].length})`),
-                    ranked[g].map((e, i) => {
-                      const sc = e.ty + e.sy * 2;
-                      const tier = i === 0 ? "Lead" : sc >= 15 ? "Senior" : sc >= 6 ? "Competent" : "Developing";
-                      const tcl = tier === "Lead" ? RL : tier === "Senior" ? "#0891B2" : tier === "Competent" ? "#64748B" : RM;
-                      return React.createElement(
-                        "div",
-                        {
-                          key: e.id,
-                          style: {
-                            padding: "8px 16px",
-                            borderBottom: "1px solid #F1F5F9",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10
-                          }
-                        },
-                        React.createElement("div", { style: { width: 22, height: 22, borderRadius: 99, background: D, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 } }, i + 1),
-                        React.createElement(
-                          "div",
-                          { style: { flex: 1, minWidth: 0 } },
-                          React.createElement("div", { style: { fontSize: 12, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, e.name),
-                          React.createElement("div", { style: { fontSize: 10, color: "#94A3B8" } }, `${e.role} · ${e.shift} · ${e.ty}yr trade · ${e.sy}yr shutdown`)
-                        ),
-                        React.createElement("span", { style: { padding: "2px 8px", borderRadius: 99, fontSize: 9, fontWeight: 700, color: "white", background: tcl, flexShrink: 0 } }, tier)
-                      );
-                    })
-                  )
+            React.createElement("div", {
+              style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(360px,1fr))", gap: 16 }
+            },
+              GROUP_ORDER.filter(g => ranked[g] && ranked[g].length > 0).map(g =>
+                React.createElement("div", {
+                  key: g,
+                  style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "hidden" }
+                },
+                  React.createElement("div", {
+                    style: { padding: "14px 18px", background: SRG_DARK, color: "white", fontWeight: 700, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.8, borderBottom: `3px solid ${SRG_RED}` }
+                  }, `${g} (${ranked[g].length})`),
+                  ranked[g].map((e, i) => {
+                    const sc = e.ty + e.sy * 2;
+                    const tier = i === 0 ? "Lead" : sc >= 15 ? "Senior" : sc >= 6 ? "Competent" : "Developing";
+                    const tcl = tier === "Lead" ? RL : tier === "Senior" ? "#0891B2" : tier === "Competent" ? SRG_GREY : RM;
+                    return React.createElement("div", {
+                      key: e.id,
+                      style: {
+                        padding: "10px 18px",
+                        borderBottom: `1px solid ${SRG_BORDER}`,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12
+                      }
+                    },
+                      React.createElement("div", {
+                        style: { width: 24, height: 24, background: SRG_DARK, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }
+                      }, i + 1),
+                      React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                        React.createElement("div", {
+                          style: { fontSize: 12, fontWeight: 700, color: SRG_DARK, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }
+                        }, e.name),
+                        React.createElement("div", { style: { fontSize: 10, color: SRG_GREY, marginTop: 1 } }, `${e.role} · ${e.shift} · ${e.ty}yr trade · ${e.sy}yr shutdown`)
+                      ),
+                      React.createElement("span", {
+                        style: { padding: "3px 9px", fontSize: 9, fontWeight: 700, color: "white", background: tcl, flexShrink: 0, textTransform: "uppercase", letterSpacing: 0.3 }
+                      }, tier)
+                    );
+                  })
                 )
+              )
             ),
 
-            React.createElement(
-              "div",
-              { style: { marginTop: 24, padding: 16, background: "white", borderRadius: 8, borderLeft: `4px solid ${C}`, fontSize: 12, color: "#475569" } },
-              React.createElement("span", { style: { fontWeight: 700 } }, "Ranking Methodology:"),
-              " Personnel ranked by composite score (trade years + 2× shutdown years). Tiers: ",
-              React.createElement("span", { style: { color: RL, fontWeight: 600 } }, "Lead"),
+            React.createElement("div", {
+              style: { marginTop: 24, padding: 18, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 12, color: SRG_GREY, border: `1px solid ${SRG_BORDER}` }
+            },
+              React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Ranking Methodology: "),
+              "Personnel ranked by composite score (trade years + 2× shutdown years). Tiers: ",
+              React.createElement("span", { style: { color: RL, fontWeight: 700 } }, "Lead"),
               " = highest ranked in group, ",
-              React.createElement("span", { style: { color: "#0891B2", fontWeight: 600 } }, "Senior"),
+              React.createElement("span", { style: { color: "#0891B2", fontWeight: 700 } }, "Senior"),
               " = score ≥15, ",
-              React.createElement("span", { style: { fontWeight: 600 } }, "Competent"),
+              React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Competent"),
               " = score ≥6, ",
-              React.createElement("span", { style: { color: RM, fontWeight: 600 } }, "Developing"),
+              React.createElement("span", { style: { color: RM, fontWeight: 700 } }, "Developing"),
               " = score <6. Developing personnel will be paired with Senior/Lead workers and allocated tasks commensurate with their experience level."
             )
           ),
 
-          React.createElement(
-            "div",
-            {
-              style: {
-                marginTop: 32,
-                padding: "16px 0",
-                borderTop: "1px solid #E2E8F0",
-                display: "flex",
-                justifyContent: "space-between",
-                fontSize: 11,
-                color: "#94A3B8"
-              }
+          // ====== ROSTER TAB ======
+          tab === "roster" && React.createElement(React.Fragment, null,
+
+            React.createElement("div", {
+              style: { marginBottom: 16, display: "flex", alignItems: "center", gap: 24, flexWrap: "wrap" }
             },
+              React.createElement("div", null,
+                React.createElement("div", {
+                  style: { fontSize: 11, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 1 }
+                }, "Shutdown Roster"),
+                React.createElement("div", {
+                  style: { fontSize: 13, color: SRG_DARK, marginTop: 2 }
+                }, "17 April — 04 May 2026 (18 days)")
+              ),
+              // Legend
+              React.createElement("div", { style: { display: "flex", gap: 12, fontSize: 10, flexWrap: "wrap" } },
+                [
+                  { code: "DS", label: "Day Shift", bg: "#E8F0FE", fg: "#1E40AF" },
+                  { code: "NS", label: "Night Shift", bg: SRG_DARK, fg: "white" },
+                  { code: "FIA", label: "Fly In AM", bg: "#DCFCE7", fg: "#166534" },
+                  { code: "FOP", label: "Fly Out PM", bg: "#FEF3C7", fg: "#92400E" },
+                  { code: "FOA", label: "Fly Out AM", bg: "#FEF3C7", fg: "#92400E" },
+                  { code: "DIP", label: "Drive In PM", bg: "#DCFCE7", fg: "#166534" },
+                  { code: "DOP", label: "Drive Out PM", bg: "#FEF3C7", fg: "#92400E" }
+                ].map(l =>
+                  React.createElement("div", { key: l.code, style: { display: "flex", alignItems: "center", gap: 4 } },
+                    React.createElement("span", {
+                      style: { padding: "2px 6px", fontSize: 9, fontWeight: 700, background: l.bg, color: l.fg }
+                    }, l.code),
+                    React.createElement("span", { style: { color: SRG_GREY } }, l.label)
+                  )
+                )
+              )
+            ),
+
+            React.createElement("div", {
+              style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "auto" }
+            },
+              React.createElement("table", { style: { width: "100%", borderCollapse: "collapse", fontSize: 10 } },
+                React.createElement("thead", null,
+                  React.createElement("tr", { style: { background: SRG_DARK, color: "white" } },
+                    React.createElement("th", {
+                      style: { padding: "10px 12px", textAlign: "left", fontWeight: 700, position: "sticky", left: 0, background: SRG_DARK, zIndex: 2, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5, minWidth: 150 }
+                    }, "Name"),
+                    React.createElement("th", {
+                      style: { padding: "10px 8px", textAlign: "left", fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5, minWidth: 130 }
+                    }, "Role"),
+                    React.createElement("th", {
+                      style: { padding: "10px 8px", textAlign: "left", fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5, minWidth: 100 }
+                    }, "Notes"),
+                    DATES.map((d, i) => React.createElement("th", {
+                      key: i,
+                      style: { padding: "8px 2px", textAlign: "center", fontWeight: 700, fontSize: 9, borderLeft: "1px solid #2D2D2D", minWidth: 38 }
+                    },
+                      React.createElement("div", { style: { fontSize: 8, opacity: 0.6, fontWeight: 500 } }, DOW[i]),
+                      React.createElement("div", null, d)
+                    ))
+                  )
+                ),
+                React.createElement("tbody", null,
+                  ROSTER.map((r, ri) => {
+                    const isTBC = r.name === "TBC";
+                    const bg = isTBC ? "#FFF9E6" : ri % 2 === 0 ? "#FAFAFA" : "white";
+                    return React.createElement("tr", {
+                      key: ri,
+                      style: { background: bg, borderBottom: `1px solid ${SRG_BORDER}` }
+                    },
+                      React.createElement("td", {
+                        style: { padding: "8px 12px", fontWeight: 700, color: isTBC ? RM : SRG_DARK, whiteSpace: "nowrap", position: "sticky", left: 0, background: bg, zIndex: 1, fontSize: 11 }
+                      }, r.name),
+                      React.createElement("td", { style: { padding: "8px", color: SRG_GREY, whiteSpace: "nowrap", fontSize: 10 } }, r.role),
+                      React.createElement("td", { style: { padding: "8px", color: SRG_GREY, fontSize: 9, fontStyle: "italic" } }, r.notes),
+                      r.codes.map((c, ci) => {
+                        let bgC = "transparent", fgC = SRG_GREY;
+                        if (c === "DS") { bgC = "#E8F0FE"; fgC = "#1E40AF"; }
+                        else if (c === "NS") { bgC = SRG_DARK; fgC = "white"; }
+                        else if (c === "FIA" || c === "DIP") { bgC = "#DCFCE7"; fgC = "#166534"; }
+                        else if (c === "FOP" || c === "FOA" || c === "DOP") { bgC = "#FEF3C7"; fgC = "#92400E"; }
+                        return React.createElement("td", {
+                          key: ci,
+                          style: {
+                            padding: "6px 2px",
+                            textAlign: "center",
+                            borderLeft: `1px solid ${SRG_BORDER}`,
+                            background: bgC,
+                            color: fgC,
+                            fontWeight: 700,
+                            fontSize: 9
+                          }
+                        }, c);
+                      })
+                    );
+                  })
+                )
+              )
+            ),
+
+            React.createElement("div", {
+              style: { marginTop: 16, padding: 14, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 11, color: SRG_GREY, border: `1px solid ${SRG_BORDER}` }
+            },
+              React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK } }, "Shift Codes: "),
+              "DS = Day Shift, NS = Night Shift, FIA = Fly In AM, FOP = Fly Out PM, FOA = Fly Out AM, DIP = Drive In PM, DOP = Drive Out PM. Roster as supplied by Covalent shutdown team. Source of truth: Covalent Shutdown Roster.xlsx."
+            )
+          ),
+
+          // Footer
+          React.createElement("div", {
+            style: {
+              marginTop: 40,
+              padding: "20px 0",
+              borderTop: `1px solid ${SRG_BORDER}`,
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 10,
+              color: "#B0B0B0",
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+              flexWrap: "wrap",
+              gap: 8
+            }
+          },
             React.createElement("span", null, "SRG Global Integrated Services Pty Ltd · ABN 86 604 010 639"),
             React.createElement("span", null, `Generated ${new Date().toLocaleDateString("en-AU")} · Covalent Lithium Shutdown Apr–May 2026`)
           )
@@ -812,5 +948,6 @@
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(React.createElement(App));
   </script>
+
 </body>
 </html>
