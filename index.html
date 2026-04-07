@@ -1,21 +1,17 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SRG Global — Covalent Shutdown Workforce Dashboard</title>
-  <link rel="icon" href="https://srgglobal.com.au/wp-content/uploads/2022/08/favicon.svg" />
+  <link rel="icon" href="./srg-global-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
-
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.16/Recharts.js"></script>
 
   <script>
@@ -51,7 +47,6 @@
     select { font-family: inherit; }
     table { font-family: inherit; }
   </style>
-
 </head>
 <body>
   <div id="root"></div>
@@ -63,7 +58,6 @@
       PieChart, Pie, Cell, ResponsiveContainer, Legend
     } = Recharts;
 
-    // SRG brand colours (from srgglobal.com.au)
     const SRG_RED = "#E30613";
     const SRG_DARK = "#1A1A1A";
     const SRG_GREY = "#595959";
@@ -73,11 +67,17 @@
     const RM = "#F59E0B";
     const RL = "#16A34A";
 
+    const CONTINGENCY = {
+      total: 33,
+      srg: 6,
+      labourHire: 27
+    };
+
     const E = [
       {id:1,name:"Adam Riley",role:"Superintendent",shift:"Day",days:10,group:"Leadership",ty:15,sy:10,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Experienced shutdown superintendent with extensive Kwinana industrial leadership across chemical, refinery and processing environments. Proven capability managing large multi-discipline crews through complex shutdowns."},
       {id:2,name:"Lewis Newell",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Int",gta:false,fa:true,sum:"Mechanical supervisor with SRG Global since 2024, leading crews across Tronox, CSBP and Kleenheat shutdowns — all Major Hazard Facilities. Intermediate rigger. Currently completing Business degree. Strong emerging leader with direct Kwinana MHF experience."},
       {id:3,name:"Peter Burns",role:"Supervisor DS",shift:"Day",days:10,group:"Leadership",ty:30,sy:20,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Dual-trade boilermaker/sheetmetal worker with 30 years in the trade and 10+ years as mechanical supervisor. Extensive Pilbara shutdown experience across BHP, FMG, Rio Tinto. CSBP sodium cyanide plant shutdown experience. HR licence holder."},
-      {id:4,name:"TBC",role:"Supervisor DS",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Pre Shut Crew supervisor — position to be confirmed."},
+      {id:4,name:"Christopher McLennan",role:"Supervisor DS",shift:"Day",days:7,group:"Leadership",ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,sum:"Mechanical supervisor with 11 years at Aerison Site Services leading projects and mine site shutdowns, plus 3.5 years as Project Supervisor at Monadelphous supervising maintenance teams, client liaison, HSE interactions and daily prestarts. Trade-qualified boilermaker with Cert IV Frontline Management, Section 44 Appointed Person, Working at Heights, Gas Test Atmospheres, LF forklift, EWP and Confined Space Entry."},
       {id:55,name:"TBC",role:"Supervisor Elec",shift:"Day",days:7,group:"Leadership",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Electrical supervisor — position to be confirmed."},
       {id:56,name:"Mark Sullivan",role:"Supervisor NS",shift:"Night",days:8,group:"Leadership",ty:11,sy:8,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:true,sum:"Trade-qualified mechanical fitter with 11 years experience. Shutdown supervisor and leading hand across BHP, FMG, Karara. Pump specialist background with National Pumps & Energy. Reliable nightshift leader."},
       {id:57,name:"Jordan Kirkby",role:"Supervisor NS",shift:"Night",days:6,group:"Leadership",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Night shift supervisor — resume to be provided. Experience details to be confirmed with operations."},
@@ -122,7 +122,7 @@
       {id:18,name:"Darren Taylor",role:"Rigger Advanced",shift:"Day",days:7,group:"Rigger",ty:20,sy:13,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:true,dog:true,rig:"Adv",gta:false,fa:true,sum:"20 years at Alcoa Kwinana — advanced rigging, crane driving (25T Franna), dual lifts. Forklift, HR licence, dogging. Outstanding Kwinana industrial experience. Most experienced rigger on the crew."},
       {id:46,name:"Ricky Truslove",role:"Rigger Advanced",shift:"Night",days:6,group:"Rigger",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Advanced scaffolder with intermediate rigging and dogging. Breight Group FIFO since 2022. EWP ticket. Consistent shutdown scaffold and rigging experience."},
       {id:47,name:"Chaeyoon Kim",role:"Rigger Advanced",shift:"Night",days:4,group:"Rigger",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Intermediate rigger with Sino shutdown, Paddington Gold, Olympic Dam experience. Overhead crane, EWP, forklift, dogging. South Korean petrochemical shutdown background adds international perspective."},
-      {id:53,name:"TBC",role:"Roller Crew Supervisor",shift:"Day",days:7,group:"Roller Crew",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Roller crew supervisor — position to be confirmed."},
+      {id:53,name:"Christopher McLennan",role:"Roller Crew Supervisor",shift:"Day",days:7,group:"Roller Crew",ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,sum:"Mechanical supervisor supporting roller crew leadership depth. Strong shutdown planning and supervision background across Aerison, Monadelphous and Boddington shutdown environments."},
       {id:54,name:"Stefanos Karikis",role:"Roller Tech",shift:"Day",days:7,group:"Roller Crew",ty:3,sy:3,cse:true,wah:true,ewp:false,tele:true,fork:true,hr:false,dog:true,rig:"Bas",gta:false,fa:false,sum:"Trade assistant/serviceman at Thiess FMG Iron Bridge. Logistics background (Bis Industries Murrin Murrin). Basic rigging, dogging, telehandler, forklift, overhead crane. Versatile operator."},
       {id:551,name:"King Garcia",role:"Roller Tech",shift:"Day",days:7,group:"Roller Crew",ty:5,sy:3,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical trades assistant since 2021. Conveyor rollers, crushers, screens, chute liners. BHP/Rio/FMG/Roy Hill/GoldFields inducted. Forklift ticket. Broad site induction coverage."},
       {id:561,name:"Jeremy Larock",role:"Roller Tech",shift:"Day",days:6,group:"Roller Crew",ty:3,sy:3,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Operator and trade assistant. HR licence, telehandler, EWP, forklift. Linkforce, FQM, PPA, Citic Pacific experience. Currently completing Cert III welding. Exceptional ticket set for a roller tech."},
@@ -188,14 +188,14 @@
       {name:"Darren Taylor",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Ricky Truslove",role:"Rigger Advanced",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
       {name:"Chaeyoon Kim",role:"Rigger Advanced",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"TBC",role:"Roller Crew Supervisor",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Christopher McLennan",role:"Roller Crew Supervisor",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"King Garcia",role:"Roller Tech",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Jeremy Larock",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Henri Martins",role:"Roller Tech",notes:"Roller Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Adam Riley",role:"Superintendent",notes:"",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Lewis Newell",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Peter Burns",role:"Supervisor DS",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"TBC",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"Christopher McLennan",role:"Supervisor DS",notes:"Pre Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"TBC",role:"Supervisor Elec",notes:"",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","",""]},
       {name:"Mark Sullivan",role:"Supervisor NS",notes:"Extra Nightshift - Plant Run up",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
       {name:"Jordan Kirkby",role:"Supervisor NS",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","","","",""]},
@@ -220,7 +220,6 @@
       { key: "fa", label: "FA" }
     ];
 
-    // Map roster group abbreviations to the employee group keys used in E
     const GROUP_ORDER = ["Leadership","HSE","Boilermaker","Electrical","Fitter","Inspections","Rigger","Roller Crew","Lube Tech","Trade Assistant"];
 
     function App() {
@@ -228,6 +227,8 @@
       const [fG, sfG] = useState("All");
       const [fS, sfS] = useState("All");
       const [fT, sfT] = useState([]);
+      const [rShift, setRShift] = useState("All");
+      const [rRole, setRRole] = useState("All");
 
       const toggle = k => sfT(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
 
@@ -316,7 +317,17 @@
         return r;
       }, []);
 
-      // Card component — white background, red accent bar on left
+      const rosterRoles = [...new Set(ROSTER.map(r => r.role))].sort();
+
+      const filteredRoster = useMemo(() => {
+        return ROSTER.filter(r => {
+          if (rShift === "Day" && !r.codes.includes("DS")) return false;
+          if (rShift === "Night" && !r.codes.includes("NS")) return false;
+          if (rRole !== "All" && r.role !== rRole) return false;
+          return true;
+        });
+      }, [rShift, rRole]);
+
       const SC = ({ label, value, sub }) =>
         React.createElement("div", {
           style: {
@@ -370,7 +381,6 @@
           color: SRG_DARK
         }
       },
-        // HEADER BAR — white, logo left, title centre, SRG-styled
         React.createElement("div", {
           style: {
             background: "white",
@@ -389,20 +399,12 @@
               flexWrap: "wrap"
             }
           },
-            // SRG Logo
             React.createElement("img", {
-              src: "https://srgglobal.com.au/wp-content/uploads/2022/08/SRGG-L-01.svg",
+              src: "./srg-global-logo.png",
               alt: "SRG Global",
-              style: { height: 44, width: "auto", flexShrink: 0 },
-              onError: function(e) {
-                // Fallback to business news logo if SVG fails to load
-                e.target.onerror = null;
-                e.target.src = "https://www.businessnews.com.au/sites/default/files/bn-di-company/SRGG-logo.png";
-              }
+              style: { height: 44, width: "auto", flexShrink: 0 }
             }),
-            // Divider
             React.createElement("div", { style: { width: 1, height: 40, background: SRG_BORDER, flexShrink: 0 } }),
-            // Title block
             React.createElement("div", { style: { flex: 1, minWidth: 280 } },
               React.createElement("div", {
                 style: {
@@ -421,7 +423,6 @@
               }, `Mt Holland · April–May 2026 · ${E.length} Positions`)
             )
           ),
-          // Tab bar
           React.createElement("div", {
             style: {
               maxWidth: 1440,
@@ -440,7 +441,6 @@
 
         React.createElement("div", { style: { maxWidth: 1440, margin: "0 auto", padding: "24px 32px" } },
 
-          // ====== PROFILE TAB ======
           tab === "profile" && React.createElement(React.Fragment, null,
 
             React.createElement("div", {
@@ -449,13 +449,17 @@
               React.createElement(SC, { label: "Total Positions", value: E.length, sub: `${tN} confirmed · ${tT} TBC` }),
               React.createElement(SC, { label: "Avg Trade Experience", value: `${aT} yrs`, sub: "Named personnel only" }),
               React.createElement(SC, { label: "Avg Shutdown Experience", value: `${aS} yrs`, sub: "Named personnel only" }),
-              React.createElement(SC, { label: "Fulfilment Rate", value: `${Math.round(tN / E.length * 100)}%`, sub: `${tT} positions to fill` })
+              React.createElement(SC, { label: "Fulfilment Rate", value: `${Math.round(tN / E.length * 100)}%`, sub: `${tT} positions to fill` }),
+              React.createElement(SC, { label: "Contingency Depth", value: CONTINGENCY.total, sub: `${CONTINGENCY.srg} SRG · ${CONTINGENCY.labourHire} labour hire` })
             ),
+
+            React.createElement("div", {
+              style: { marginTop: -8, marginBottom: 24, fontSize: 11, color: SRG_GREY, fontStyle: "italic" }
+            }, "Contingency depth shown separately and excluded from planned workforce, fulfilment and risk calculations."),
 
             React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }
             },
-              // Manning by Trade Group chart
               React.createElement("div", {
                 style: { background: "white", padding: 24, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}` }
               },
@@ -481,7 +485,6 @@
                   )
                 )
               ),
-              // Shift Distribution + Ticket Coverage
               React.createElement("div", {
                 style: { background: "white", padding: 24, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}` }
               },
@@ -489,7 +492,6 @@
                   style: { fontSize: 11, fontWeight: 700, marginBottom: 16, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 1 }
                 }, "Shift Distribution & Ticket Coverage"),
                 React.createElement("div", { style: { display: "flex", gap: 16, alignItems: "center" } },
-                  // Pie with in-chart labels showing both name AND value
                   React.createElement("div", { style: { width: "42%", display: "flex", flexDirection: "column", alignItems: "center" } },
                     React.createElement(ResponsiveContainer, { width: "100%", height: 170 },
                       React.createElement(PieChart, null,
@@ -507,7 +509,6 @@
                         )
                       )
                     ),
-                    // Custom legend below pie
                     React.createElement("div", { style: { display: "flex", gap: 12, marginTop: 8, fontSize: 11 } },
                       sd.map((s, i) => React.createElement("div", {
                         key: i,
@@ -520,7 +521,6 @@
                       ))
                     )
                   ),
-                  // Ticket coverage bars
                   React.createElement("div", { style: { flex: 1 } },
                     Object.entries(tc).map(([k, v]) =>
                       React.createElement("div", {
@@ -551,7 +551,6 @@
               )
             ),
 
-            // Filters
             React.createElement("div", {
               style: { display: "flex", gap: 12, marginBottom: 10, flexWrap: "wrap", alignItems: "center" }
             },
@@ -592,7 +591,6 @@
               }, `${filtered.length} personnel shown`)
             ),
 
-            // Ticket filter pills
             React.createElement("div", {
               style: { display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }
             },
@@ -628,7 +626,6 @@
               })
             ),
 
-            // Employee table
             React.createElement("div", {
               style: { background: "white", boxShadow: "0 1px 2px rgba(0,0,0,0.04)", border: `1px solid ${SRG_BORDER}`, overflow: "auto" }
             },
@@ -695,7 +692,6 @@
             )
           ),
 
-          // ====== RISK TAB ======
           tab === "risk" && React.createElement(React.Fragment, null,
 
             React.createElement("div", {
@@ -817,7 +813,6 @@
             )
           ),
 
-          // ====== ROSTER TAB ======
           tab === "roster" && React.createElement(React.Fragment, null,
 
             React.createElement("div", {
@@ -829,9 +824,72 @@
                 }, "Shutdown Roster"),
                 React.createElement("div", {
                   style: { fontSize: 13, color: SRG_DARK, marginTop: 2 }
-                }, "17 April — 04 May 2026 (18 days)")
+                }, `17 April — 04 May 2026 (18 days) · ${filteredRoster.length} rows shown`)
               ),
-              // Legend
+
+              React.createElement("div", {
+                style: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }
+              },
+                React.createElement("span", {
+                  style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8 }
+                }, "Filter:"),
+
+                React.createElement("button", {
+                  onClick: () => setRShift("All"),
+                  style: {
+                    padding: "6px 12px",
+                    border: rShift === "All" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rShift === "All" ? SRG_RED : "white",
+                    color: rShift === "All" ? "white" : SRG_DARK,
+                    cursor: "pointer",
+                    fontSize: 11,
+                    fontWeight: 700
+                  }
+                }, "All Shifts"),
+
+                React.createElement("button", {
+                  onClick: () => setRShift("Day"),
+                  style: {
+                    padding: "6px 12px",
+                    border: rShift === "Day" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rShift === "Day" ? SRG_RED : "white",
+                    color: rShift === "Day" ? "white" : SRG_DARK,
+                    cursor: "pointer",
+                    fontSize: 11,
+                    fontWeight: 700
+                  }
+                }, "Day Shift"),
+
+                React.createElement("button", {
+                  onClick: () => setRShift("Night"),
+                  style: {
+                    padding: "6px 12px",
+                    border: rShift === "Night" ? `2px solid ${SRG_RED}` : `1px solid ${SRG_BORDER}`,
+                    background: rShift === "Night" ? SRG_RED : "white",
+                    color: rShift === "Night" ? "white" : SRG_DARK,
+                    cursor: "pointer",
+                    fontSize: 11,
+                    fontWeight: 700
+                  }
+                }, "Night Shift"),
+
+                React.createElement("select", {
+                  value: rRole,
+                  onChange: e => setRRole(e.target.value),
+                  style: {
+                    padding: "7px 12px",
+                    border: `1px solid ${SRG_BORDER}`,
+                    fontSize: 11,
+                    background: "white",
+                    color: SRG_DARK,
+                    minWidth: 180
+                  }
+                },
+                  React.createElement("option", { value: "All" }, "All Positions"),
+                  rosterRoles.map(role => React.createElement("option", { key: role, value: role }, role))
+                )
+              ),
+
               React.createElement("div", { style: { display: "flex", gap: 12, fontSize: 10, flexWrap: "wrap" } },
                 [
                   { code: "DS", label: "Day Shift", bg: "#E8F0FE", fg: "#1E40AF" },
@@ -877,7 +935,7 @@
                   )
                 ),
                 React.createElement("tbody", null,
-                  ROSTER.map((r, ri) => {
+                  filteredRoster.map((r, ri) => {
                     const isTBC = r.name === "TBC";
                     const bg = isTBC ? "#FFF9E6" : ri % 2 === 0 ? "#FAFAFA" : "white";
                     return React.createElement("tr", {
@@ -922,7 +980,6 @@
             )
           ),
 
-          // Footer
           React.createElement("div", {
             style: {
               marginTop: 40,
@@ -948,6 +1005,5 @@
     const root = ReactDOM.createRoot(document.getElementById("root"));
     root.render(React.createElement(App));
   </script>
-
 </body>
 </html>
