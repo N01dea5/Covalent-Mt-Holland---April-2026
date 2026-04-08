@@ -226,7 +226,8 @@
       {name:"Madeline Jones",role:"T.A. (Sentry)",notes:"Post Shut - Must have LF VOC",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Federico Sarti",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Lea Mondesir",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
-      {name:"Ellie Jeon",role:"T.A. Telehandler",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]}
+      {name:"Ellie Jeon",role:"T.A. Telehandler",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Lewis Ferris",role:"T.A. Telehandler",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]}
     ];
 
     const TC = [
@@ -343,7 +344,7 @@
             }
 
             named.forEach(e => {
-              if (e.sum.includes("resume to be provided")) {
+              if (/resume.*(to be provided|pending)/i.test(e.sum)) {
                 r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — resume not yet received`, action: "Obtain and review resume before mobilisation to verify competency." });
               }
             });
