@@ -528,6 +528,61 @@
           tab === "profile" && React.createElement(React.Fragment, null,
 
             React.createElement("div", {
+              style: {
+                background: "white",
+                border: `1px solid ${SRG_BORDER}`,
+                borderTop: `3px solid ${SRG_RED}`,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                marginBottom: 24,
+                padding: "18px 24px"
+              }
+            },
+              React.createElement("div", {
+                style: {
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: SRG_RED,
+                  textTransform: "uppercase",
+                  letterSpacing: 1.2,
+                  marginBottom: 14
+                }
+              }, "Key Contacts"),
+              React.createElement("div", {
+                style: {
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                  gap: 12
+                }
+              },
+                [
+                  { name: "Mark Cowle", role: "General Manager", contact: "" },
+                  { name: "Josh Toth", role: "Operations Manager", contact: "0414 940 421 · joshua.toth@srgglobal.com.au" },
+                  { name: "Haydyn Nissen", role: "HSE — Escalation", contact: "" },
+                  { name: "Adam Riley", role: "Shutdown Superintendent (Dayshift)", contact: "0457 162 100" },
+                  { name: "Anthony Smith", role: "Coordinator (Nightshift)", contact: "0404 303 368" },
+                  { name: "Mobilisation Support", role: "South West Mobilisation", contact: "southwestmobilisation@srgglobal.com.au" }
+                ].map((c, i) => React.createElement("div", {
+                  key: i,
+                  style: {
+                    padding: "12px 14px",
+                    background: "#FAFAFA",
+                    borderLeft: `3px solid ${SRG_DARK}`
+                  }
+                },
+                  React.createElement("div", {
+                    style: { fontSize: 13, fontWeight: 800, color: SRG_DARK, lineHeight: 1.2 }
+                  }, c.name),
+                  c.role && React.createElement("div", {
+                    style: { fontSize: 11, color: SRG_GREY, marginTop: 3, fontWeight: 600 }
+                  }, c.role),
+                  c.contact && React.createElement("div", {
+                    style: { fontSize: 11, color: SRG_RED, marginTop: 5, fontWeight: 700, wordBreak: "break-word" }
+                  }, c.contact)
+                ))
+              )
+            ),
+
+            React.createElement("div", {
               style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 16, marginBottom: 24 }
             },
               React.createElement(SC, { label: "Planned Workforce", value: E.length, sub: "Core planned positions" }),
