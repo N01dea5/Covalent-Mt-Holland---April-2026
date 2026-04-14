@@ -80,18 +80,18 @@
     const RL = "#16A34A";
 
     const CONTINGENCY = {
-      total: 37,
+      total: 29,
       byGroup: {
         "Leadership": 0,
         "HSE": 0,
         "Boilermaker": 3,
-        "Electrical": 2,
-        "Fitter": 14,
-        "Inspections": 0,
+        "Electrical": 0,
+        "Fitter": 8,
+        "Inspections": 2,
         "Rigger": 3,
         "Roller Crew": 5,
         "Lube Tech": 0,
-        "Trade Assistant": 10
+        "Trade Assistant": 8
       }
     };
 
@@ -123,11 +123,11 @@
       {id:9,name:"Jake Gangemi",role:"Fitter",shift:"Day",days:7,group:"Fitter",ty:8,sy:5,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:true,sum:"Mechanical fitter with Rio maintenance background and strong shutdown exposure across crushers, conveyors and pulleys. Forklift and dogging tickets."},
       {id:10,name:"Mao Li",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:3,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:true,dog:false,rig:"",gta:true,fa:false,sum:"Cert III mechanical fitter with Masters in Mechanical Engineering. Currently with Warrikal across FMG, PLS and BHP shutdowns. Pump rebuilds/alignment, conveyor skirts and chutes, jaw/cone crushers, apron feeders. Greenbushes shutdown experience. HR, forklift, EWP and gas testing tickets."},
       {id:11,name:"Walid Boulahdid",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:false,rig:"Bas",gta:false,fa:false,sum:"Mechanical fitter with shutdown experience across BHP, Rio, Roy Hill, FMG and South32. Basic rigging and broad processing plant exposure."},
-      {id:12,name:"Donggyu (Peter) Kim",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:true,dog:false,rig:"",gta:true,fa:true,sum:"Cert III mechanical fitter with TA and hose hand shutdown background at Roy Hill, Woodside Onslow and multiple Pilbara sites. MSIC, HR licence, HPWJ, forklift and gas testing. Recently completed UTS Diploma of Engineering/IT. Broad site induction coverage across BHP, Rio, FMG, Roy Hill, Sino and Karara. Developing fitter."},
+      {id:12,name:"TBC",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Day shift fitter — position to be confirmed. Mackauly Parker listed as SRG contingent."},
       {id:13,name:"Omkar Dorugade",role:"Fitter",shift:"Day",days:4,group:"Fitter",ty:12,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"12+ year maintenance fitter with strong preventative maintenance and precision assembly background."},
       {id:35,name:"Herbert Mukunga",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:6,sy:5,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:true,dog:false,rig:"",gta:true,fa:true,sum:"Mechanical fitter with turbine and conveyor expertise and a strong ticket set including telehandler, EWP, HR and gas testing."},
-      {id:36,name:"Charlie Capaldi",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"",gta:true,fa:true,sum:"Cert III mechanical fitter with BEng (Hons) in Mechanical Engineering (IMechE-accredited). 2 years full-time at FMG on dewatering, diesel gensets and submersible pumps. Prior Covalent Lithium commissioning experience (Mar–Jun 2023), plus Karara full-time and shutdowns at Telfer, FQM Ravensthorpe, BHP Mt Keith, KCGM and Talison Lithium. MJI hand torque qualified. Forklift, EWP, dogging, gas testing. Direct Mt Holland plant knowledge."},
-      {id:37,name:"Jordi Patino Roca",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Mechanical fitter with intermediate rigging and dogging plus broad Tier 1 FIFO site exposure."},
+      {id:36,name:"Selva Loorthsmay",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical fitter (Extra Nightshift / Plant Run-up) — resume and experience details to be confirmed."},
+      {id:37,name:"Alessio Sammito",role:"Fitter",shift:"Night",days:6,group:"Fitter",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical fitter (Extra Nightshift / Plant Run-up) — resume and experience details to be confirmed. Ronald Bennett listed as labour hire contingent."},
       {id:38,name:"Gurshwinder Singh",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:3,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical fitter with Greenbushes shutdown experience, broad site exposure and forklift / EWP tickets."},
       {id:39,name:"Kulvinder Singh",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:2,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical fitter with broad processing plant experience including reclaimers, crushers and apron feeders."},
       {id:40,name:"Abdikadir Mohamed",role:"Fitter",shift:"Night",days:4,group:"Fitter",ty:5,sy:4,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Mechanical fitter with solid shutdown maintenance experience across conveyors, crushers, rollers and valves."},
@@ -141,7 +141,7 @@
       {id:63,name:"Amit Gund",role:"Fitter - Inspections",shift:"Day",days:5,group:"Inspections",ty:3,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:true,rig:"",gta:false,fa:false,sum:"Mechanical fitter with HPGR inspection and processing plant background plus dogging and forklift tickets."},
       {id:64,name:"Wisdom Mandizvidza",role:"Fitter - Inspections",shift:"Night",days:5,group:"Inspections",ty:13,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:true,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"13-year mechanical fitter with Cert III Engineering and Level 3 IVQ Technician Diploma (City & Guilds). Currently with Linkforce on shutdowns — crushing and screening plants, conveyors, bearings, pulleys, chutes and liners. Prior Sino Iron shutdown experience on gearbox seals and E-crane hydraulics, plus 2.5 years at WAMMCO Katanning on fixed plant. Deep international background including Francis pump turbine specialist work in South Africa and smelter furnaces. Forklift, CSE, WAH."},
       {id:17,name:"Joe Dack",role:"Rigger Advanced",shift:"Day",days:9,group:"Rigger",ty:4,sy:2,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:false,dog:true,rig:"Int + IRATA L1",gta:false,fa:true,sum:"Intermediate rigger with IRATA L1 rope access, strong leadership background and dogging ticket."},
-      {id:18,name:"Darren Taylor",role:"Rigger Advanced",shift:"Day",days:7,group:"Rigger",ty:20,sy:13,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:true,dog:true,rig:"Adv",gta:false,fa:true,sum:"Highly experienced advanced rigger with long Alcoa Kwinana experience, crane operations, dogging and HR."},
+      {id:18,name:"Nathan Arbuckle",role:"Rigger Advanced",shift:"Day",days:7,group:"Rigger",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Rigger Advanced (Post Shut Crew) — resume and experience details to be confirmed. Corbett Rhys and Hopla Sven listed as labour hire contingents."},
       {id:46,name:"Ricky Truslove",role:"Rigger Advanced",shift:"Night",days:6,group:"Rigger",ty:4,sy:4,cse:true,wah:true,ewp:true,tele:false,fork:false,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Advanced scaffolder with intermediate rigging and dogging and consistent shutdown experience."},
       {id:47,name:"Chaeyoon Kim",role:"Rigger Advanced",shift:"Night",days:4,group:"Rigger",ty:4,sy:3,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:true,rig:"Int",gta:false,fa:false,sum:"Intermediate rigger with shutdown exposure plus overhead crane, EWP, forklift and dogging."},
       {id:53,name:"Christopher McLennan",role:"Roller Crew Supervisor",shift:"Day",days:7,group:"Roller Crew",ty:18,sy:15,cse:true,wah:true,ewp:true,tele:false,fork:true,hr:false,dog:false,rig:"",gta:true,fa:false,sum:"Mechanical supervisor supporting roller crew leadership depth with strong shutdown planning and supervision experience."},
@@ -157,7 +157,7 @@
       {id:48,name:"William Thompson",role:"T.A. (Sentry)",shift:"Night",days:4,group:"Trade Assistant",ty:2,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:true,fa:true,sum:"Two-year FIFO trade assistant at Regis/Genesis Bandya Leonora and drillers offsider with Westralian Diamond Drillers and Impact Drilling. Hands-on with isolations, pre-starts, basic mechanical servicing and power tools. HR-B licence, gas testing and first aid."},
       {id:49,name:"Lea Mondesir",role:"T.A. (Sentry)",shift:"Night",days:4,group:"Trade Assistant",ty:1,sy:1,cse:true,wah:true,ewp:false,tele:false,fork:false,hr:true,dog:false,rig:"",gta:false,fa:false,sum:"Trade assistant with SRG shutdown experience, utility background and HR licence."},
       {id:28,name:"Ellie Jeon",role:"T.A. Telehandler",shift:"Day",days:10,group:"Trade Assistant",ty:5,sy:4,cse:true,wah:true,ewp:true,tele:true,fork:true,hr:true,dog:false,rig:"",gta:false,fa:true,sum:"Experienced plant operator with telehandler, loader, excavator and dump truck capability plus HR licence."},
-      {id:29,name:"Lewis Ferris",role:"T.A. Telehandler",shift:"Night",days:8,group:"Trade Assistant",ty:2,sy:1,cse:true,wah:true,ewp:true,tele:true,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Materials logistics officer with telehandler and EWP capability plus strong site induction coverage."},
+      {id:29,name:"Shane Cox",role:"T.A. Telehandler",shift:"Night",days:8,group:"Trade Assistant",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"T.A. Telehandler (Night shift) — resume and experience details to be confirmed. Lewis Ferris listed as labour hire contingent."},
       {id:30,name:"David Bryce",role:"Bus Driver",shift:"Day",days:9,group:"Trade Assistant",ty:0,sy:0,cse:false,wah:false,ewp:false,tele:false,fork:false,hr:false,dog:false,rig:"",gta:false,fa:false,sum:"Bus driver — resume and experience details to be confirmed."}
     ];
 
@@ -183,11 +183,11 @@
       {name:"Jake Gangemi",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Mao Li",role:"Fitter",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Walid Boulahdid",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
-      {name:"Donggyu (Peter) Kim",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
+      {name:"TBC",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Omkar Dorugade",role:"Fitter",notes:"",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Herbert Mukunga",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Charlie Capaldi",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
-      {name:"Jordi Patino Roca",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Selva Loorthsmay",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
+      {name:"Alessio Sammito",role:"Fitter",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
       {name:"Gurshwinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Kulvinder Singh",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Abdikadir Mohamed",role:"Fitter",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
@@ -207,7 +207,7 @@
       {name:"Mehdi Mokeddem",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","","FIA","DS","DS","DS","DS","FOP","","","","","",""]},
       {name:"Lakshman Vasanthan",role:"Lube Tech T/A",notes:"Lube Team 2",codes:["","","","","","FIA","NS","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Joe Dack",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Darren Taylor",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
+      {name:"Nathan Arbuckle",role:"Rigger Advanced",notes:"Post Shut Crew",codes:["","","","","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
       {name:"Ricky Truslove",role:"Rigger Advanced",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","NS","NS","FOA","","","",""]},
       {name:"Chaeyoon Kim",role:"Rigger Advanced",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Christopher McLennan",role:"Roller Crew Supervisor",notes:"Roller Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","FOP","","","","","",""]},
@@ -227,7 +227,7 @@
       {name:"William Thompson",role:"T.A. (Sentry)",notes:"",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Lea Mondesir",role:"T.A. (Sentry)",notes:"Extra Nightshift - Plant Run up",codes:["","","","","","","FIA","NS","NS","NS","NS","FOA","","","","","",""]},
       {name:"Ellie Jeon",role:"T.A. Telehandler",notes:"Pre/Post Shut Crew",codes:["","","","FIA","DS","DS","DS","DS","DS","DS","DS","DS","DS","DS","FOP","","",""]},
-      {name:"Lewis Ferris",role:"T.A. Telehandler",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]}
+      {name:"Shane Cox",role:"T.A. Telehandler",notes:"",codes:["","","","","FIA","NS","NS","NS","NS","NS","NS","NS","NS","FOA","","","",""]}
     ];
 
     const TC = [
