@@ -245,6 +245,54 @@
 
     const GROUP_ORDER = ["Leadership","HSE","Boilermaker","Electrical","Fitter","Inspections","Rigger","Roller Crew","Lube Tech","Trade Assistant"];
 
+    // Roller Crew Gantt — work-order level tasks extracted from MTHS2603 schedule (Apr 15 draft)
+    const GANTT_START = new Date("2026-04-21T00:00");
+    const GANTT_END = new Date("2026-05-05T00:00");
+    const GANTT_AREAS = [
+      { id: "120-121", name: "Area 120-121 Crushing (Dry Plant)" },
+      { id: "120-122", name: "Area 120-122 Feed Prep & Tertiary Crushing (Wet Plant)" },
+      { id: "120-123", name: "Area 120-123 Grinding & Classification" },
+      { id: "120-125", name: "Area 120-125 Concentrator Thickening & Filtration" }
+    ];
+    const STANDARD_ROLLER_SUBTASKS = ["Inspect/Replace Carry Rollers","Inspect/Replace Impact Rollers","Inspect/Replace Return Rollers"];
+    const GANTT_TASKS = [
+      { id:"CV-001", area:"120-121", floc:"120-121-CV-001", wo:"4077484", name:"8W Mech OFF Insp Rollers 121-CV-001", start:"2026-04-22T06:15", finish:"2026-04-22T09:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-002", area:"120-121", floc:"120-121-CV-002", wo:"4077489", name:"8W Mech OFF Insp Rollers 121-CV-002", start:"2026-04-22T09:15", finish:"2026-04-22T12:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-003-RI", area:"120-121", floc:"120-121-CV-003", wo:"4078377", name:"Replace Impact rollers 121-CV-003", start:"2026-04-22T08:15", finish:"2026-04-23T02:15", duration:18, crew:"Fitter (External)", subtasks:["JHA and Permit","Remove Guards","Replace Impact Rollers","Replace Guards"] },
+      { id:"CV-003", area:"120-121", floc:"120-121-CV-003", wo:"4077494", name:"8W Mech OFF Insp Rollers 121-CV-003", start:"2026-04-22T12:15", finish:"2026-04-22T15:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-004-CI", area:"120-121", floc:"120-121-CV-004", wo:"4078451", name:"Change Impact Rollers 121-CV-004", start:"2026-04-22T06:15", finish:"2026-04-22T12:15", duration:6, crew:"Fitter (External)", subtasks:["JHA and Permit","Remove Guards","Replace Impact Rollers","Replace Guards"] },
+      { id:"CV-004", area:"120-121", floc:"120-121-CV-004", wo:"4077494", name:"8W Mech OFF Insp Rollers 121-CV-004", start:"2026-04-22T15:15", finish:"2026-04-23T06:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-005", area:"120-121", floc:"120-121-CV-005", wo:"4077499", name:"8W Mech OFF Insp Rollers 121-CV-005", start:"2026-04-23T06:15", finish:"2026-04-23T09:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-006", area:"120-121", floc:"120-121-CV-006", wo:"4077504", name:"8W Mech OFF Insp Rollers 121-CV-006", start:"2026-04-23T09:15", finish:"2026-04-23T12:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-024", area:"120-121", floc:"120-121-CV-024", wo:"4077509", name:"8W Mech OFF Insp Rollers 121-CV-024", start:"2026-04-23T12:15", finish:"2026-04-23T15:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"FE-008", area:"120-122", floc:"120-121-FE-008", wo:"4077529", name:"8W Mech OFF Insp Rollers 121-FE-008", start:"2026-04-23T15:15", finish:"2026-04-24T06:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-010", area:"120-122", floc:"120-121-CV-010", wo:"4077533", name:"8W Mech OFF Insp Rollers 121-CV-010", start:"2026-04-24T06:15", finish:"2026-04-24T09:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-011", area:"120-122", floc:"120-121-CV-011", wo:"4077514", name:"8W Mech OFF Insp Rollers 121-CV-011", start:"2026-04-24T09:15", finish:"2026-04-24T12:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-012", area:"120-122", floc:"120-121-CV-012", wo:"4077519", name:"8W Mech OFF Insp Rollers 121-CV-012", start:"2026-04-24T12:15", finish:"2026-04-24T15:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-013", area:"120-122", floc:"120-122-CV-013", wo:"4077524", name:"8W Mech OFF Insp Rollers 122-CV-013", start:"2026-04-24T15:15", finish:"2026-04-25T06:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-014", area:"120-122", floc:"120-122-CV-014", wo:"4077538", name:"8W Mech OFF Insp Rollers 122-CV-014", start:"2026-04-25T06:15", finish:"2026-04-25T09:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-015", area:"120-122", floc:"120-122-CV-015", wo:"4077543", name:"8W Mech OFF Insp Rollers 122-CV-015", start:"2026-04-25T09:15", finish:"2026-04-25T12:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-018", area:"120-122", floc:"120-122-CV-018", wo:"4077548", name:"8W Mech OFF Insp Rollers 122-CV-018", start:"2026-04-25T12:15", finish:"2026-04-25T15:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-019", area:"120-122", floc:"120-122-CV-019", wo:"4077553", name:"8W Mech OFF Insp Rollers 122-CV-019", start:"2026-04-25T15:15", finish:"2026-04-26T06:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-020", area:"120-122", floc:"120-122-CV-020", wo:"4077558", name:"8W Mech OFF Insp Rollers 122-CV-020", start:"2026-04-26T06:15", finish:"2026-04-26T09:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-021", area:"120-122", floc:"120-122-CV-021", wo:"4077563", name:"8W Mech OFF Insp Rollers 122-CV-021", start:"2026-04-26T09:15", finish:"2026-04-26T12:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-021-BI", area:"120-122", floc:"120-122-CV-021", wo:"4083897", name:"BI — Replace Impact Rollers CV-021", start:"2026-04-26T12:15", finish:"2026-04-26T16:15", duration:4, crew:"Fitter (External)", subtasks:["JHA and Permit","CV-021 Replace Impact Rollers"] },
+      { id:"ST-001", area:"120-122", floc:"120-122-ST-001", wo:"4077568", name:"8W Mech OFF Insp Rollers 122-ST-001", start:"2026-04-26T16:15", finish:"2026-04-27T07:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"ST-002", area:"120-122", floc:"120-122-ST-002", wo:"4077573", name:"8W Mech OFF Insp Rollers 122-ST-002", start:"2026-04-27T07:15", finish:"2026-04-27T10:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-022", area:"120-123", floc:"120-123-CV-022", wo:"4077578", name:"8W Mech OFF Insp Rollers 123-CV-022", start:"2026-04-27T10:15", finish:"2026-04-27T13:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-125-1", area:"120-125", floc:"120-125-CV-025", wo:"4077583", name:"8W Mech OFF Insp Rollers 125-CV-025", start:"2026-04-27T13:15", finish:"2026-04-27T16:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-125-2", area:"120-125", floc:"120-125-CV-026", wo:"4077588", name:"8W Mech OFF Insp Rollers 125-CV-026", start:"2026-04-27T16:15", finish:"2026-04-28T07:15", duration:15, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-125-3", area:"120-125", floc:"120-125-CV-027", wo:"4077593", name:"8W Mech OFF Insp Rollers 125-CV-027", start:"2026-04-28T07:15", finish:"2026-04-28T10:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS },
+      { id:"CV-125-4", area:"120-125", floc:"120-125-CV-028", wo:"4077598", name:"8W Mech OFF Insp Rollers 125-CV-028", start:"2026-04-28T10:15", finish:"2026-04-28T13:15", duration:3, crew:"Roller Crew T01", subtasks:STANDARD_ROLLER_SUBTASKS }
+    ];
+    const TASK_STATUSES = [
+      { key:"not-started", label:"Not Started", color:"#9CA3AF" },
+      { key:"in-progress", label:"In Progress", color:"#2563EB" },
+      { key:"blocked", label:"Blocked", color:"#F59E0B" },
+      { key:"delayed", label:"Delayed", color:"#DC2626" },
+      { key:"complete", label:"Complete", color:"#16A34A" }
+    ];
+
     function App() {
       const [tab, setTab] = useState("profile");
       const [fG, sfG] = useState("All");
@@ -252,8 +300,58 @@
       const [fT, sfT] = useState([]);
       const [rShift, setRShift] = useState("All");
       const [rRole, setRRole] = useState("All");
+      const [taskStatus, setTaskStatus] = useState(() => {
+        try { return JSON.parse(localStorage.getItem("srg_gantt_status") || "{}"); }
+        catch { return {}; }
+      });
+      const [selectedTaskId, setSelectedTaskId] = useState(null);
+      const [gAreaFilter, setGAreaFilter] = useState("All");
+      const [gStatusFilter, setGStatusFilter] = useState("All");
 
       const toggle = k => sfT(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
+
+      const saveTaskStatus = (id, update) => {
+        const prev = taskStatus[id] || {};
+        const next = { ...taskStatus, [id]: { ...prev, ...update, lastUpdated: new Date().toISOString() } };
+        setTaskStatus(next);
+        try { localStorage.setItem("srg_gantt_status", JSON.stringify(next)); } catch {}
+      };
+      const getTaskState = id => taskStatus[id] || { status: "not-started", percent: 0, notes: "", delayReason: "" };
+      const exportGanttJSON = () => {
+        const payload = {
+          exportedAt: new Date().toISOString(),
+          schedule: "MTHS2603 SRG Roller Crew — Covalent Mt Holland April 2026",
+          tasks: GANTT_TASKS.map(t => ({ ...t, state: getTaskState(t.id) }))
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `roller-gantt-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+      const importGanttJSON = evt => {
+        const file = evt.target.files && evt.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            const nextStatus = {};
+            const tasks = parsed.tasks || parsed;
+            if (Array.isArray(tasks)) {
+              tasks.forEach(t => { if (t.id && t.state) nextStatus[t.id] = t.state; });
+            } else if (typeof parsed === "object") {
+              Object.assign(nextStatus, parsed);
+            }
+            setTaskStatus(nextStatus);
+            try { localStorage.setItem("srg_gantt_status", JSON.stringify(nextStatus)); } catch {}
+            alert("Imported " + Object.keys(nextStatus).length + " task updates.");
+          } catch (err) { alert("Invalid JSON: " + err.message); }
+        };
+        reader.readAsText(file);
+        evt.target.value = "";
+      };
 
       const filtered = useMemo(() => E.filter(e => {
         if (fG !== "All" && e.group !== fG) return false;
@@ -599,6 +697,7 @@
             React.createElement(TabBtn, { id: "profile", label: "Workforce Profile" }),
             React.createElement(TabBtn, { id: "risk", label: "Risk Assessment" }),
             React.createElement(TabBtn, { id: "roster", label: "Shutdown Roster" }),
+            React.createElement(TabBtn, { id: "gantt", label: "Roller Gantt" }),
             React.createElement(TabBtn, { id: "print", label: "Print Summary" })
           )
         ),
@@ -1167,6 +1266,261 @@
               "DS = Day Shift, NS = Night Shift, FIA = Fly In AM, FOP = Fly Out PM, FOA = Fly Out AM, DIP = Drive In PM, DOP = Drive Out PM. Roster as supplied by Covalent shutdown team. Source of truth: Covalent Shutdown Roster.xlsx."
             )
           ),
+
+          tab === "gantt" && (() => {
+            const totalMs = GANTT_END - GANTT_START;
+            const msToPct = d => Math.max(0, Math.min(100, ((new Date(d) - GANTT_START) / totalMs) * 100));
+            const filteredTasks = GANTT_TASKS.filter(t => {
+              if (gAreaFilter !== "All" && t.area !== gAreaFilter) return false;
+              if (gStatusFilter !== "All") {
+                const s = getTaskState(t.id).status;
+                if (s !== gStatusFilter) return false;
+              }
+              return true;
+            });
+            const statusCounts = TASK_STATUSES.reduce((acc, s) => {
+              acc[s.key] = GANTT_TASKS.filter(t => getTaskState(t.id).status === s.key).length;
+              return acc;
+            }, {});
+            const overallPct = Math.round(GANTT_TASKS.reduce((s, t) => s + (getTaskState(t.id).percent || 0), 0) / GANTT_TASKS.length);
+            const days = [];
+            for (let d = new Date(GANTT_START); d < GANTT_END; d.setDate(d.getDate() + 1)) {
+              days.push(new Date(d));
+            }
+            const selectedTask = GANTT_TASKS.find(t => t.id === selectedTaskId);
+            const selectedState = selectedTask ? getTaskState(selectedTask.id) : null;
+
+            return React.createElement(React.Fragment, null,
+
+              React.createElement("div", {
+                style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 16 }
+              },
+                React.createElement(SC, { label: "Total Work Orders", value: GANTT_TASKS.length, sub: "Roller crew scope" }),
+                React.createElement(SC, { label: "Overall Progress", value: `${overallPct}%`, sub: "Weighted by task" }),
+                ...TASK_STATUSES.map(s => React.createElement("div", {
+                  key: s.key,
+                  style: { background: "white", borderLeft: `3px solid ${s.color}`, padding: "14px 18px", boxShadow: "0 1px 2px rgba(0,0,0,0.04)" }
+                },
+                  React.createElement("div", { style: { fontSize: 22, fontWeight: 800, color: SRG_DARK, lineHeight: 1.1 } }, statusCounts[s.key]),
+                  React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, marginTop: 3, textTransform: "uppercase", letterSpacing: 0.5 } }, s.label)
+                ))
+              ),
+
+              React.createElement("div", {
+                style: { display: "flex", gap: 12, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }
+              },
+                React.createElement("span", {
+                  style: { fontSize: 11, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8 }
+                }, "Filter:"),
+                React.createElement("select", {
+                  value: gAreaFilter,
+                  onChange: e => setGAreaFilter(e.target.value),
+                  style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
+                },
+                  React.createElement("option", { value: "All" }, "All Areas"),
+                  GANTT_AREAS.map(a => React.createElement("option", { key: a.id, value: a.id }, a.name))
+                ),
+                React.createElement("select", {
+                  value: gStatusFilter,
+                  onChange: e => setGStatusFilter(e.target.value),
+                  style: { padding: "7px 12px", border: `1px solid ${SRG_BORDER}`, fontSize: 12, background: "white", color: SRG_DARK }
+                },
+                  React.createElement("option", { value: "All" }, "All Statuses"),
+                  TASK_STATUSES.map(s => React.createElement("option", { key: s.key, value: s.key }, s.label))
+                ),
+                React.createElement("span", {
+                  style: { fontSize: 11, color: SRG_GREY, fontWeight: 600 }
+                }, `${filteredTasks.length} of ${GANTT_TASKS.length} work orders`),
+                React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8 } },
+                  React.createElement("button", {
+                    onClick: exportGanttJSON,
+                    style: { padding: "6px 12px", border: `1px solid ${SRG_DARK}`, background: "white", color: SRG_DARK, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: 0.5 }
+                  }, "Export JSON"),
+                  React.createElement("label", {
+                    style: { padding: "6px 12px", border: `1px solid ${SRG_DARK}`, background: "white", color: SRG_DARK, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: 0.5 }
+                  },
+                    "Import JSON",
+                    React.createElement("input", { type: "file", accept: ".json", onChange: importGanttJSON, style: { display: "none" } })
+                  )
+                )
+              ),
+
+              React.createElement("div", {
+                style: { background: "white", border: `1px solid ${SRG_BORDER}`, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", marginBottom: 16, overflow: "hidden" }
+              },
+                React.createElement("div", {
+                  style: { display: "grid", gridTemplateColumns: "280px 80px 1fr", borderBottom: `2px solid ${SRG_DARK}`, background: SRG_DARK, color: "white" }
+                },
+                  React.createElement("div", { style: { padding: "10px 12px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 } }, "Work Order"),
+                  React.createElement("div", { style: { padding: "10px 6px", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center" } }, "Status"),
+                  React.createElement("div", {
+                    style: { display: "grid", gridTemplateColumns: `repeat(${days.length}, 1fr)`, borderLeft: "1px solid #2D2D2D" }
+                  },
+                    days.map((d, i) => React.createElement("div", {
+                      key: i,
+                      style: { padding: "4px 2px", fontSize: 9, fontWeight: 700, textAlign: "center", borderLeft: i > 0 ? "1px solid #2D2D2D" : "none" }
+                    },
+                      React.createElement("div", { style: { opacity: 0.6, fontWeight: 500 } }, d.toLocaleDateString("en-AU", { weekday: "short" })),
+                      React.createElement("div", null, (d.getDate() + "").padStart(2, "0") + "/" + ((d.getMonth() + 1) + "").padStart(2, "0"))
+                    ))
+                  )
+                ),
+                filteredTasks.length === 0 && React.createElement("div", {
+                  style: { padding: "24px", textAlign: "center", color: SRG_GREY, fontSize: 12, fontStyle: "italic" }
+                }, "No work orders match the current filters."),
+                filteredTasks.map((t, idx) => {
+                  const state = getTaskState(t.id);
+                  const statusMeta = TASK_STATUSES.find(s => s.key === state.status) || TASK_STATUSES[0];
+                  const leftPct = msToPct(t.start);
+                  const rightPct = msToPct(t.finish);
+                  const widthPct = Math.max(1, rightPct - leftPct);
+                  const bgRow = idx % 2 === 0 ? "white" : "#FAFAFA";
+                  const isSel = selectedTaskId === t.id;
+                  return React.createElement("div", {
+                    key: t.id,
+                    onClick: () => setSelectedTaskId(t.id),
+                    style: { display: "grid", gridTemplateColumns: "280px 80px 1fr", borderBottom: `1px solid ${SRG_BORDER}`, background: isSel ? "#FFF5F5" : bgRow, cursor: "pointer" }
+                  },
+                    React.createElement("div", { style: { padding: "10px 12px", borderRight: `1px solid ${SRG_BORDER}` } },
+                      React.createElement("div", { style: { fontSize: 12, fontWeight: 700, color: SRG_DARK, lineHeight: 1.2 } }, t.floc),
+                      React.createElement("div", { style: { fontSize: 10, color: SRG_GREY, marginTop: 2 } }, `${t.name} · ${t.duration}hr`),
+                      React.createElement("div", { style: { fontSize: 9, color: "#8C8C8C", marginTop: 2 } }, `WO ${t.wo} · ${t.crew}`)
+                    ),
+                    React.createElement("div", { style: { padding: "10px 6px", borderRight: `1px solid ${SRG_BORDER}`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3 } },
+                      React.createElement("span", {
+                        style: { padding: "2px 6px", fontSize: 8, fontWeight: 700, color: "white", background: statusMeta.color, textTransform: "uppercase", letterSpacing: 0.3, whiteSpace: "nowrap" }
+                      }, statusMeta.label),
+                      React.createElement("span", { style: { fontSize: 11, fontWeight: 800, color: SRG_DARK } }, `${state.percent || 0}%`)
+                    ),
+                    React.createElement("div", {
+                      style: { position: "relative", padding: "14px 0", minHeight: 44, background: `repeating-linear-gradient(90deg, transparent, transparent calc(${100/days.length}% - 1px), #F0F0F0 calc(${100/days.length}% - 1px), #F0F0F0 ${100/days.length}%)` }
+                    },
+                      React.createElement("div", {
+                        style: {
+                          position: "absolute",
+                          left: `${leftPct}%`,
+                          width: `${widthPct}%`,
+                          top: 10,
+                          height: 22,
+                          background: statusMeta.color,
+                          borderRadius: 2,
+                          opacity: 0.35,
+                          minWidth: 4
+                        }
+                      }),
+                      React.createElement("div", {
+                        style: {
+                          position: "absolute",
+                          left: `${leftPct}%`,
+                          width: `${widthPct * (state.percent || 0) / 100}%`,
+                          top: 10,
+                          height: 22,
+                          background: statusMeta.color,
+                          borderRadius: 2,
+                          minWidth: (state.percent || 0) > 0 ? 4 : 0
+                        }
+                      })
+                    )
+                  );
+                })
+              ),
+
+              selectedTask && React.createElement("div", {
+                style: { background: "white", border: `1px solid ${SRG_BORDER}`, borderTop: `3px solid ${SRG_RED}`, boxShadow: "0 1px 2px rgba(0,0,0,0.04)", padding: 20, marginBottom: 16 }
+              },
+                React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 8 } },
+                  React.createElement("div", null,
+                    React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_RED, textTransform: "uppercase", letterSpacing: 1 } }, "Update Work Order"),
+                    React.createElement("div", { style: { fontSize: 18, fontWeight: 800, color: SRG_DARK, marginTop: 2 } }, selectedTask.floc),
+                    React.createElement("div", { style: { fontSize: 12, color: SRG_GREY, marginTop: 2 } }, `${selectedTask.name} · WO ${selectedTask.wo} · ${selectedTask.duration}hr · ${selectedTask.crew}`),
+                    React.createElement("div", { style: { fontSize: 11, color: "#8C8C8C", marginTop: 2 } },
+                      "Scheduled: " + new Date(selectedTask.start).toLocaleString("en-AU") + " → " + new Date(selectedTask.finish).toLocaleString("en-AU")
+                    )
+                  ),
+                  React.createElement("button", {
+                    onClick: () => setSelectedTaskId(null),
+                    style: { border: `1px solid ${SRG_BORDER}`, background: "white", color: SRG_GREY, padding: "4px 10px", cursor: "pointer", fontSize: 14, fontWeight: 700 }
+                  }, "✕ Close")
+                ),
+                React.createElement("div", {
+                  style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 16, marginBottom: 16 }
+                },
+                  React.createElement("div", null,
+                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Status"),
+                    React.createElement("select", {
+                      value: selectedState.status || "not-started",
+                      onChange: e => saveTaskStatus(selectedTask.id, { status: e.target.value }),
+                      style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK, fontWeight: 600 }
+                    },
+                      TASK_STATUSES.map(s => React.createElement("option", { key: s.key, value: s.key }, s.label))
+                    )
+                  ),
+                  React.createElement("div", null,
+                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, `% Complete (${selectedState.percent || 0}%)`),
+                    React.createElement("input", {
+                      type: "range", min: 0, max: 100, step: 5,
+                      value: selectedState.percent || 0,
+                      onChange: e => saveTaskStatus(selectedTask.id, { percent: parseInt(e.target.value, 10) }),
+                      style: { width: "100%" }
+                    })
+                  ),
+                  React.createElement("div", null,
+                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Updated By (Supervisor)"),
+                    React.createElement("input", {
+                      type: "text",
+                      placeholder: "Your name",
+                      value: selectedState.updatedBy || "",
+                      onChange: e => saveTaskStatus(selectedTask.id, { updatedBy: e.target.value }),
+                      style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK }
+                    })
+                  )
+                ),
+                (selectedState.status === "delayed" || selectedState.status === "blocked") && React.createElement("div", { style: { marginBottom: 16 } },
+                  React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Delay / Blocker Reason"),
+                  React.createElement("input", {
+                    type: "text",
+                    placeholder: "Describe the cause of delay / blocker",
+                    value: selectedState.delayReason || "",
+                    onChange: e => saveTaskStatus(selectedTask.id, { delayReason: e.target.value }),
+                    style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK }
+                  })
+                ),
+                React.createElement("div", { style: { marginBottom: 12 } },
+                  React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Notes"),
+                  React.createElement("textarea", {
+                    rows: 3,
+                    placeholder: "Add progress notes, observations, hand-over notes...",
+                    value: selectedState.notes || "",
+                    onChange: e => saveTaskStatus(selectedTask.id, { notes: e.target.value }),
+                    style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK, fontFamily: "inherit", resize: "vertical" }
+                  })
+                ),
+                React.createElement("div", { style: { marginTop: 8 } },
+                  React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Sub-tasks / Work Steps"),
+                  React.createElement("ul", { style: { listStyle: "none", padding: 0, margin: 0 } },
+                    selectedTask.subtasks.map((st, i) => React.createElement("li", {
+                      key: i,
+                      style: { padding: "6px 10px", background: "#FAFAFA", borderLeft: `3px solid ${SRG_DARK}`, marginBottom: 4, fontSize: 12, color: SRG_DARK }
+                    }, st))
+                  )
+                ),
+                selectedState.lastUpdated && React.createElement("div", {
+                  style: { marginTop: 12, fontSize: 10, color: "#8C8C8C", fontStyle: "italic" }
+                }, "Last updated: " + new Date(selectedState.lastUpdated).toLocaleString("en-AU") + (selectedState.updatedBy ? ` by ${selectedState.updatedBy}` : ""))
+              ),
+
+              React.createElement("div", {
+                style: { padding: 14, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 11, color: SRG_GREY, border: `1px solid ${SRG_BORDER}`, lineHeight: 1.5 }
+              },
+                React.createElement("div", { style: { fontWeight: 700, color: SRG_DARK, marginBottom: 4 } }, "Status updates"),
+                "Updates save to your device (localStorage) — they stay on this browser. Use ",
+                React.createElement("b", null, "Export JSON"),
+                " at end of shift to share with the next supervisor, or ",
+                React.createElement("b", null, "Import JSON"),
+                " to load updates from another device. Phase 2 will replace this with live SharePoint / Power Apps sync."
+              )
+            );
+          })(),
 
           tab === "print" && React.createElement(React.Fragment, null,
 
