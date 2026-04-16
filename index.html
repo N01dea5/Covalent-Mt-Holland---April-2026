@@ -376,41 +376,6 @@
         try { localStorage.setItem("srg_gantt_status", JSON.stringify(next)); } catch {}
       };
       const getTaskState = id => taskStatus[id] || { status: "not-started", percent: 0, notes: "", delayReason: "" };
-      const exportGanttJSON = () => {
-        const payload = {
-          exportedAt: new Date().toISOString(),
-          schedule: "MTHS2603 SRG Roller Crew — Covalent Mt Holland April 2026",
-          tasks: GANTT_TASKS.map(t => ({ ...t, state: getTaskState(t.id) }))
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = `roller-gantt-${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      };
-      const importGanttJSON = evt => {
-        const file = evt.target.files && evt.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = ev => {
-          try {
-            const parsed = JSON.parse(ev.target.result);
-            const nextStatus = {};
-            const tasks = parsed.tasks || parsed;
-            if (Array.isArray(tasks)) {
-              tasks.forEach(t => { if (t.id && t.state) nextStatus[t.id] = t.state; });
-            } else if (typeof parsed === "object") {
-              Object.assign(nextStatus, parsed);
-            }
-            setTaskStatus(nextStatus);
-            try { localStorage.setItem("srg_gantt_status", JSON.stringify(nextStatus)); } catch {}
-            alert("Imported " + Object.keys(nextStatus).length + " task updates.");
-          } catch (err) { alert("Invalid JSON: " + err.message); }
-        };
-        reader.readAsText(file);
-        evt.target.value = "";
-      };
 
       const filtered = useMemo(() => E.filter(e => {
         if (fG !== "All" && e.group !== fG) return false;
@@ -1616,17 +1581,7 @@
                     onClick: syncFromSharePoint,
                     disabled: syncState.status === "syncing",
                     style: { padding: "6px 12px", border: `1px solid ${SRG_RED}`, background: SRG_RED, color: "white", fontWeight: 700, fontSize: 11, cursor: syncState.status === "syncing" ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: 0.5, opacity: syncState.status === "syncing" ? 0.6 : 1 }
-                  }, "↻ Refresh"),
-                  React.createElement("button", {
-                    onClick: exportGanttJSON,
-                    style: { padding: "6px 12px", border: `1px solid ${SRG_DARK}`, background: "white", color: SRG_DARK, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: 0.5 }
-                  }, "Export JSON"),
-                  React.createElement("label", {
-                    style: { padding: "6px 12px", border: `1px solid ${SRG_DARK}`, background: "white", color: SRG_DARK, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: 0.5 }
-                  },
-                    "Import JSON",
-                    React.createElement("input", { type: "file", accept: ".json", onChange: importGanttJSON, style: { display: "none" } })
-                  )
+                  }, "↻ Refresh")
                 )
               ),
 
@@ -1741,9 +1696,7 @@
                 React.createElement("code", { style: { fontFamily: "monospace", fontSize: 10 } }, "gantt-status.json"),
                 "). Field supervisors update tasks via Power Apps; their changes appear here on the next sync. Click ",
                 React.createElement("b", null, "↻ Refresh"),
-                " for an instant pull. ",
-                React.createElement("b", null, "Export / Import JSON"),
-                " remain available as offline backups."
+                " for an instant pull."
               )
             );
           })(),
