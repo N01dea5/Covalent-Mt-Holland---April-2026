@@ -312,8 +312,19 @@
 
       const SHAREPOINT_JSON_URL = "https://raw.githubusercontent.com/N01dea5/Covalent-Mt-Holland---April-2026/main/gantt-status.json";
 
+      // Unwrap SharePoint/Power Automate field shapes:
+      //   choice cols → { Value: "..." }, people cols → { DisplayName: "..." },
+      //   plain strings/numbers pass through unchanged.
+      const unwrap = (v) => {
+        if (v === null || v === undefined) return "";
+        if (typeof v === "object") return v.Value || v.DisplayName || v.value || "";
+        return v;
+      };
+
       const normalizeStatus = (s) => {
-        if (!s) return "not-started";
+        const raw = unwrap(s);
+        if (!raw) return "not-started";
+        const str = String(raw);
         const map = {
           "Not Started": "not-started", "not started": "not-started",
           "In Progress": "in-progress", "in progress": "in-progress",
@@ -321,7 +332,7 @@
           "Delayed": "delayed",
           "Complete": "complete", "Completed": "complete"
         };
-        return map[s] || s.toLowerCase().replace(/\s+/g, "-");
+        return map[str] || str.toLowerCase().replace(/\s+/g, "-");
       };
 
       const syncFromSharePoint = () => {
@@ -335,21 +346,21 @@
             const items = Array.isArray(data) ? data : (data.tasks || data.value || []);
             const next = {};
             items.forEach(item => {
-              const id = item.id || item.Title || item.title;
+              const id = unwrap(item.id || item.Title || item.title);
               if (!id) return;
               const src = item.state || item;
               next[id] = {
-                status: normalizeStatus(src.status || src.Status || (src.Status && src.Status.Value)),
-                percent: parseInt(src.percent || src.PercentComplete || src["Percent Complete"] || 0, 10),
-                notes: src.notes || src.Notes || "",
-                delayReason: src.delayReason || src.DelayReason || src["Delay Reason"] || "",
-                updatedBy: src.updatedBy || src.UpdatedBy || src["Updated By"] || "",
-                actualHours: src.actualHours || src.ActualHours || src["Actual Hours"] || "",
-                actualStart: src.actualStart || src.ActualStart || src["Actual Start"] || "",
-                actualFinish: src.actualFinish || src.ActualFinish || src["Actual Finish"] || "",
-                pictureUrl: src.pictureUrl || src.Picture || "",
+                status: normalizeStatus(src.status || src.Status),
+                percent: parseInt(unwrap(src.percent || src.PercentComplete || src["Percent Complete"]) || 0, 10),
+                notes: unwrap(src.notes || src.Notes) || "",
+                delayReason: unwrap(src.delayReason || src.DelayReason || src["Delay Reason"]) || "",
+                updatedBy: unwrap(src.updatedBy || src.UpdatedBy || src["Updated By"] || src.Editor) || "",
+                actualHours: unwrap(src.actualHours || src.ActualHours || src["Actual Hours"]) || "",
+                actualStart: unwrap(src.actualStart || src.ActualStart || src["Actual Start"]) || "",
+                actualFinish: unwrap(src.actualFinish || src.ActualFinish || src["Actual Finish"]) || "",
+                pictureUrl: unwrap(src.pictureUrl || src.Picture) || "",
                 assignedWorkers: src.assignedWorkers || [],
-                lastUpdated: src.lastUpdated || src.Modified || new Date().toISOString()
+                lastUpdated: unwrap(src.lastUpdated || src.Modified) || new Date().toISOString()
               };
             });
             setTaskStatus(next);
