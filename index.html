@@ -380,12 +380,6 @@
 
       const toggle = k => sfT(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
 
-      const saveTaskStatus = (id, update) => {
-        const prev = taskStatus[id] || {};
-        const next = { ...taskStatus, [id]: { ...prev, ...update, lastUpdated: new Date().toISOString() } };
-        setTaskStatus(next);
-        try { localStorage.setItem("srg_gantt_status", JSON.stringify(next)); } catch {}
-      };
       const getTaskState = id => taskStatus[id] || { status: "not-started", percent: 0, notes: "", delayReason: "" };
 
       const filtered = useMemo(() => E.filter(e => {
@@ -1338,16 +1332,30 @@
               const variance = hasActual ? actualNum - task.duration : 0;
               const varColor = !hasActual ? SRG_GREY : variance > 0 ? "#DC2626" : variance < 0 ? "#16A34A" : SRG_DARK;
               const varLabel = !hasActual ? "—" : (variance > 0 ? "+" : "") + variance.toFixed(1) + "hr";
-              const needsActualHours = state.status === "complete" && !hasActual;
+              const statusMeta = TASK_STATUSES.find(s => s.key === (state.status || "not-started")) || TASK_STATUSES[0];
+              const assigned = state.assignedWorkers || [];
+              const assignedNames = assigned.map(a => {
+                if (typeof a === "string") {
+                  const w = E.find(x => x.id === a);
+                  return w ? w.name : a;
+                }
+                if (a && typeof a === "object") return a.DisplayName || a.displayName || a.name || "";
+                return "";
+              }).filter(Boolean);
+              const fieldLabel = { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 };
+              const fieldValue = { fontSize: 13, color: SRG_DARK, fontWeight: 600, padding: "6px 0", minHeight: 20 };
               return React.createElement("div", {
                 key: "edit-" + task.id,
                 style: { background: "white", border: `1px solid ${SRG_BORDER}`, borderLeft: `4px solid ${SRG_RED}`, borderTop: "none", padding: 18, marginBottom: 0 }
               },
                 React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 8 } },
                   React.createElement("div", null,
-                    React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_RED, textTransform: "uppercase", letterSpacing: 1 } }, "Update Work Order"),
+                    React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_RED, textTransform: "uppercase", letterSpacing: 1 } }, "Work Order Details"),
                     React.createElement("div", { style: { fontSize: 11, color: "#8C8C8C", marginTop: 2 } },
                       "Scheduled: " + new Date(task.start).toLocaleString("en-AU") + " → " + new Date(task.finish).toLocaleString("en-AU")
+                    ),
+                    React.createElement("div", { style: { fontSize: 10, color: "#8C8C8C", marginTop: 2, fontStyle: "italic" } },
+                      "Read-only view. Updates are made in Power Apps / SharePoint and appear here on the next sync."
                     )
                   ),
                   React.createElement("button", {
@@ -1359,56 +1367,37 @@
                   style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 14, marginBottom: 14 }
                 },
                   React.createElement("div", null,
-                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Status"),
-                    React.createElement("select", {
-                      value: state.status || "not-started",
-                      onChange: e => saveTaskStatus(task.id, { status: e.target.value }),
-                      style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK, fontWeight: 600 }
-                    },
-                      TASK_STATUSES.map(s => React.createElement("option", { key: s.key, value: s.key }, s.label))
+                    React.createElement("div", { style: fieldLabel }, "Status"),
+                    React.createElement("div", { style: { display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 10px", background: "white", border: `1px solid ${SRG_BORDER}`, borderLeft: `4px solid ${statusMeta.color}`, fontSize: 13, fontWeight: 700, color: SRG_DARK } },
+                      statusMeta.label
                     )
                   ),
                   React.createElement("div", null,
-                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, `% Complete (${state.percent || 0}%)`),
-                    React.createElement("input", {
-                      type: "range", min: 0, max: 100, step: 5,
-                      value: state.percent || 0,
-                      onChange: e => saveTaskStatus(task.id, { percent: parseInt(e.target.value, 10) }),
-                      style: { width: "100%" }
-                    })
+                    React.createElement("div", { style: fieldLabel }, "% Complete"),
+                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+                      React.createElement("div", { style: { flex: 1, height: 8, background: "#F3F4F6", border: `1px solid ${SRG_BORDER}`, position: "relative", overflow: "hidden" } },
+                        React.createElement("div", { style: { width: (state.percent || 0) + "%", height: "100%", background: statusMeta.color, transition: "width .2s" } })
+                      ),
+                      React.createElement("div", { style: { fontSize: 14, fontWeight: 700, color: SRG_DARK, minWidth: 44, textAlign: "right" } }, (state.percent || 0) + "%")
+                    )
                   ),
                   React.createElement("div", null,
-                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Updated By (Supervisor)"),
-                    React.createElement("input", {
-                      type: "text",
-                      placeholder: "Your name",
-                      value: state.updatedBy || "",
-                      onChange: e => saveTaskStatus(task.id, { updatedBy: e.target.value }),
-                      style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK }
-                    })
+                    React.createElement("div", { style: fieldLabel }, "Updated By"),
+                    React.createElement("div", { style: fieldValue }, state.updatedBy || "—")
                   )
                 ),
                 React.createElement("div", {
-                  style: { background: needsActualHours ? "#FEF3C7" : "#FAFAFA", border: needsActualHours ? "1px solid #F59E0B" : `1px solid ${SRG_BORDER}`, padding: 12, marginBottom: 14 }
+                  style: { background: "#FAFAFA", border: `1px solid ${SRG_BORDER}`, padding: 12, marginBottom: 14 }
                 },
-                  React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 } },
-                    "Time Confirmation",
-                    needsActualHours && React.createElement("span", { style: { marginLeft: 8, color: "#92400E", fontWeight: 800 } }, "⚠ Actual hours required to mark complete")
-                  ),
+                  React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 } }, "Time Confirmation"),
                   React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 12, alignItems: "end" } },
                     React.createElement("div", null,
                       React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 } }, "Planned Hours"),
                       React.createElement("div", { style: { fontSize: 22, fontWeight: 800, color: SRG_DARK, lineHeight: 1 } }, task.duration + " hr")
                     ),
                     React.createElement("div", null,
-                      React.createElement("label", { style: { display: "block", fontSize: 9, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 } }, "Actual Hours"),
-                      React.createElement("input", {
-                        type: "number", min: 0, step: 0.25,
-                        placeholder: "0.0",
-                        value: actual !== undefined ? actual : "",
-                        onChange: e => saveTaskStatus(task.id, { actualHours: e.target.value }),
-                        style: { width: "100%", padding: "6px 10px", border: needsActualHours ? "2px solid #F59E0B" : `1px solid ${SRG_BORDER}`, fontSize: 16, fontWeight: 700, background: "white", color: SRG_DARK }
-                      })
+                      React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 } }, "Actual Hours"),
+                      React.createElement("div", { style: { fontSize: 22, fontWeight: 800, color: SRG_DARK, lineHeight: 1 } }, hasActual ? actualNum.toFixed(2) + " hr" : "—")
                     ),
                     React.createElement("div", null,
                       React.createElement("div", { style: { fontSize: 9, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 4 } }, "Variance"),
@@ -1418,99 +1407,27 @@
                   )
                 ),
                 (state.status === "delayed" || state.status === "blocked") && React.createElement("div", { style: { marginBottom: 14 } },
-                  React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Delay / Blocker Reason"),
-                  React.createElement("input", {
-                    type: "text",
-                    placeholder: "Describe the cause of delay / blocker",
-                    value: state.delayReason || "",
-                    onChange: e => saveTaskStatus(task.id, { delayReason: e.target.value }),
-                    style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK }
-                  })
+                  React.createElement("div", { style: fieldLabel }, "Delay / Blocker Reason"),
+                  React.createElement("div", { style: { padding: "8px 10px", background: "#FFF5F5", border: `1px solid ${SRG_BORDER}`, fontSize: 13, color: SRG_DARK, whiteSpace: "pre-wrap" } },
+                    state.delayReason || "—"
+                  )
                 ),
-                (() => {
-                  const assigned = state.assignedWorkers || [];
-                  const toggleAssign = (wid) => {
-                    const next = assigned.includes(wid) ? assigned.filter(x => x !== wid) : [...assigned, wid];
-                    saveTaskStatus(task.id, { assignedWorkers: next });
-                  };
-                  const availableWorkers = E.filter(e => {
-                    if (e.name.startsWith("TBC")) return false;
-                    if (e.shift !== task.shift) return false;
-                    return true;
-                  });
-                  const preferredGroups = task.discipline === "Roller Crew"
-                    ? ["Roller Crew", "Fitter", "Trade Assistant"]
-                    : task.discipline === "Fitter"
-                    ? ["Fitter", "Roller Crew", "Inspections"]
-                    : null;
-                  const isPreferred = (w) => !preferredGroups || preferredGroups.includes(w.group);
-                  const sortedWorkers = [...availableWorkers].sort((a, b) => {
-                    const ap = isPreferred(a) ? 0 : 1;
-                    const bp = isPreferred(b) ? 0 : 1;
-                    if (ap !== bp) return ap - bp;
-                    return a.name.localeCompare(b.name);
-                  });
-                  return React.createElement("div", { style: { marginBottom: 14 } },
-                    React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } },
-                      `Allocate Workers · ${task.shift} Shift · ${assigned.length} assigned`
-                    ),
-                    assigned.length > 0 && React.createElement("div", {
-                      style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, padding: "8px 10px", background: "#FFF5F5", border: `1px solid ${SRG_BORDER}` }
-                    },
-                      assigned.map(wid => {
-                        const w = E.find(x => x.id === wid);
-                        if (!w) return null;
-                        return React.createElement("span", {
-                          key: wid,
-                          style: { padding: "3px 8px", fontSize: 11, fontWeight: 700, color: "white", background: SRG_RED, display: "inline-flex", alignItems: "center", gap: 6 }
-                        },
-                          w.name,
-                          React.createElement("span", {
-                            onClick: (ev) => { ev.stopPropagation(); toggleAssign(wid); },
-                            style: { cursor: "pointer", fontSize: 12, opacity: 0.85 }
-                          }, "✕")
-                        );
-                      })
-                    ),
-                    React.createElement("div", {
-                      style: { maxHeight: 220, overflowY: "auto", border: `1px solid ${SRG_BORDER}`, background: "white" }
-                    },
-                      sortedWorkers.length === 0 && React.createElement("div", {
-                        style: { padding: 12, fontSize: 11, color: SRG_GREY, fontStyle: "italic" }
-                      }, `No ${task.shift} shift workers available.`),
-                      sortedWorkers.map(w => {
-                        const sel = assigned.includes(w.id);
-                        const pref = isPreferred(w);
-                        return React.createElement("label", {
-                          key: w.id,
-                          style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderBottom: `1px solid ${SRG_BORDER}`, cursor: "pointer", background: sel ? "#FFF5F5" : "white", fontSize: 11 }
-                        },
-                          React.createElement("input", {
-                            type: "checkbox",
-                            checked: sel,
-                            onChange: () => toggleAssign(w.id),
-                            style: { margin: 0 }
-                          }),
-                          React.createElement("span", { style: { fontWeight: 700, color: SRG_DARK, minWidth: 160 } }, w.name),
-                          React.createElement("span", { style: { color: SRG_GREY, minWidth: 130 } }, w.role),
-                          React.createElement("span", { style: { color: "#8C8C8C", fontSize: 10 } }, `${w.ty}yr / ${w.sy}yr s/d`),
-                          pref && React.createElement("span", {
-                            style: { marginLeft: "auto", fontSize: 8, fontWeight: 700, color: "white", background: SRG_DARK, padding: "2px 6px", textTransform: "uppercase", letterSpacing: 0.3 }
-                          }, "Preferred")
-                        );
-                      })
-                    )
-                  );
-                })(),
+                React.createElement("div", { style: { marginBottom: 14 } },
+                  React.createElement("div", { style: fieldLabel }, `Assigned Workers · ${task.shift} Shift · ${assignedNames.length} assigned`),
+                  assignedNames.length === 0
+                    ? React.createElement("div", { style: { fontSize: 12, color: SRG_GREY, fontStyle: "italic", padding: "4px 0" } }, "None assigned")
+                    : React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 10px", background: "#FFF5F5", border: `1px solid ${SRG_BORDER}` } },
+                        assignedNames.map((name, i) => React.createElement("span", {
+                          key: i,
+                          style: { padding: "3px 8px", fontSize: 11, fontWeight: 700, color: "white", background: SRG_RED }
+                        }, name))
+                      )
+                ),
                 React.createElement("div", { style: { marginBottom: 12 } },
-                  React.createElement("label", { style: { display: "block", fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Notes"),
-                  React.createElement("textarea", {
-                    rows: 3,
-                    placeholder: "Add progress notes, observations, hand-over notes...",
-                    value: state.notes || "",
-                    onChange: e => saveTaskStatus(task.id, { notes: e.target.value }),
-                    style: { width: "100%", padding: "8px 10px", border: `1px solid ${SRG_BORDER}`, fontSize: 13, background: "white", color: SRG_DARK, fontFamily: "inherit", resize: "vertical" }
-                  })
+                  React.createElement("div", { style: fieldLabel }, "Notes"),
+                  React.createElement("div", { style: { padding: "8px 10px", background: "#FAFAFA", border: `1px solid ${SRG_BORDER}`, fontSize: 13, color: SRG_DARK, minHeight: 40, whiteSpace: "pre-wrap" } },
+                    state.notes || React.createElement("span", { style: { color: SRG_GREY, fontStyle: "italic" } }, "No notes")
+                  )
                 ),
                 React.createElement("div", { style: { marginTop: 8 } },
                   React.createElement("div", { style: { fontSize: 10, fontWeight: 700, color: SRG_GREY, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 } }, "Sub-tasks / Work Steps"),
