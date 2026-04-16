@@ -64,7 +64,7 @@
   <div id="root"></div>
 
   <script>
-    const { useState, useMemo } = React;
+    const { useState, useMemo, useEffect } = React;
     const {
       BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
       PieChart, Pie, Cell, ResponsiveContainer, Legend
@@ -308,6 +308,64 @@
       const [gAreaFilter, setGAreaFilter] = useState("All");
       const [gStatusFilter, setGStatusFilter] = useState("All");
       const [gDateFilter, setGDateFilter] = useState(null);
+      const [syncState, setSyncState] = useState({ status: "idle", lastSync: null, error: null });
+
+      const SHAREPOINT_JSON_URL = "https://raw.githubusercontent.com/N01dea5/Covalent-Mt-Holland---April-2026/main/gantt-status.json";
+
+      const normalizeStatus = (s) => {
+        if (!s) return "not-started";
+        const map = {
+          "Not Started": "not-started", "not started": "not-started",
+          "In Progress": "in-progress", "in progress": "in-progress",
+          "Blocked": "blocked",
+          "Delayed": "delayed",
+          "Complete": "complete", "Completed": "complete"
+        };
+        return map[s] || s.toLowerCase().replace(/\s+/g, "-");
+      };
+
+      const syncFromSharePoint = () => {
+        setSyncState({ status: "syncing", lastSync: syncState.lastSync, error: null });
+        fetch(SHAREPOINT_JSON_URL + "?t=" + Date.now())
+          .then(r => {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then(data => {
+            const items = Array.isArray(data) ? data : (data.tasks || data.value || []);
+            const next = {};
+            items.forEach(item => {
+              const id = item.id || item.Title || item.title;
+              if (!id) return;
+              const src = item.state || item;
+              next[id] = {
+                status: normalizeStatus(src.status || src.Status || (src.Status && src.Status.Value)),
+                percent: parseInt(src.percent || src.PercentComplete || src["Percent Complete"] || 0, 10),
+                notes: src.notes || src.Notes || "",
+                delayReason: src.delayReason || src.DelayReason || src["Delay Reason"] || "",
+                updatedBy: src.updatedBy || src.UpdatedBy || src["Updated By"] || "",
+                actualHours: src.actualHours || src.ActualHours || src["Actual Hours"] || "",
+                actualStart: src.actualStart || src.ActualStart || src["Actual Start"] || "",
+                actualFinish: src.actualFinish || src.ActualFinish || src["Actual Finish"] || "",
+                pictureUrl: src.pictureUrl || src.Picture || "",
+                assignedWorkers: src.assignedWorkers || [],
+                lastUpdated: src.lastUpdated || src.Modified || new Date().toISOString()
+              };
+            });
+            setTaskStatus(next);
+            try { localStorage.setItem("srg_gantt_status", JSON.stringify(next)); } catch {}
+            setSyncState({ status: "ok", lastSync: new Date().toISOString(), error: null });
+          })
+          .catch(err => {
+            setSyncState({ status: "error", lastSync: syncState.lastSync, error: err.message });
+          });
+      };
+
+      useEffect(() => {
+        syncFromSharePoint();
+        const interval = setInterval(syncFromSharePoint, 5 * 60 * 1000);
+        return () => clearInterval(interval);
+      }, []);
 
       const toggle = k => sfT(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
 
@@ -1538,7 +1596,27 @@
                 React.createElement("span", {
                   style: { fontSize: 11, color: SRG_GREY, fontWeight: 600 }
                 }, `${filteredTasks.length} of ${GANTT_TASKS.length} work orders`),
-                React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8 } },
+                React.createElement("div", { style: { marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" } },
+                  React.createElement("span", {
+                    style: {
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: syncState.status === "error" ? "#DC2626" : syncState.status === "syncing" ? "#F59E0B" : syncState.status === "ok" ? "#16A34A" : SRG_GREY,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5
+                    },
+                    title: syncState.error || (syncState.lastSync ? "Last synced: " + new Date(syncState.lastSync).toLocaleString("en-AU") : "")
+                  },
+                    syncState.status === "syncing" ? "● Syncing…" :
+                    syncState.status === "error" ? "● Sync error" :
+                    syncState.status === "ok" && syncState.lastSync ? `● Synced ${new Date(syncState.lastSync).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" })}` :
+                    "● Not synced"
+                  ),
+                  React.createElement("button", {
+                    onClick: syncFromSharePoint,
+                    disabled: syncState.status === "syncing",
+                    style: { padding: "6px 12px", border: `1px solid ${SRG_RED}`, background: SRG_RED, color: "white", fontWeight: 700, fontSize: 11, cursor: syncState.status === "syncing" ? "not-allowed" : "pointer", textTransform: "uppercase", letterSpacing: 0.5, opacity: syncState.status === "syncing" ? 0.6 : 1 }
+                  }, "↻ Refresh"),
                   React.createElement("button", {
                     onClick: exportGanttJSON,
                     style: { padding: "6px 12px", border: `1px solid ${SRG_DARK}`, background: "white", color: SRG_DARK, fontWeight: 700, fontSize: 11, cursor: "pointer", textTransform: "uppercase", letterSpacing: 0.5 }
@@ -1658,12 +1736,14 @@
               React.createElement("div", {
                 style: { padding: 14, background: "white", borderLeft: `3px solid ${SRG_RED}`, fontSize: 11, color: SRG_GREY, border: `1px solid ${SRG_BORDER}`, lineHeight: 1.5 }
               },
-                React.createElement("div", { style: { fontWeight: 700, color: SRG_DARK, marginBottom: 4 } }, "Status updates"),
-                "Updates save to your device (localStorage) — they stay on this browser. Use ",
-                React.createElement("b", null, "Export JSON"),
-                " at end of shift to share with the next supervisor, or ",
-                React.createElement("b", null, "Import JSON"),
-                " to load updates from another device. Phase 2 will replace this with live SharePoint / Power Apps sync."
+                React.createElement("div", { style: { fontWeight: 700, color: SRG_DARK, marginBottom: 4 } }, "Live sync"),
+                "Dashboard auto-syncs from SharePoint every 5 minutes (via Power Automate → ",
+                React.createElement("code", { style: { fontFamily: "monospace", fontSize: 10 } }, "gantt-status.json"),
+                "). Field supervisors update tasks via Power Apps; their changes appear here on the next sync. Click ",
+                React.createElement("b", null, "↻ Refresh"),
+                " for an instant pull. ",
+                React.createElement("b", null, "Export / Import JSON"),
+                " remain available as offline backups."
               )
             );
           })(),
