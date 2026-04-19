@@ -607,6 +607,8 @@
 
       const risks = useMemo(() => {
         const r = [];
+
+        // Per-group/shift checks: unfilled positions, GTA coverage
         groups.forEach(g => {
           ["Day", "Night"].forEach(s => {
             const crew = E.filter(e => e.group === g && e.shift === s);
@@ -619,27 +621,32 @@
               r.push({ group: g, shift: s, level: "HIGH", issue: `${tbc.length} unfilled position(s)`, action: "Source and confirm personnel before shutdown mobilisation." });
             }
 
-            named.forEach(e => {
-              if (e.sy < 1 && e.ty > 0) {
-                r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — limited shutdown experience`, action: "Pair with experienced worker for initial shifts. Do not assign to isolated or critical path tasks without direct oversight." });
-              }
-            });
-
-            if (["Fitter", "Trade Assistant", "Roller Crew"].includes(g) && !named.some(e => e.tele) && named.length > 0) {
-              r.push({ group: g, shift: s, level: "LOW", issue: "No telehandler ticket holder in group", action: "Confirm telehandler access from adjacent crew or source ticket holder." });
-            }
-
             if (!named.some(e => e.gta) && named.length > 2 && ["Fitter", "Boilermaker"].includes(g)) {
               r.push({ group: g, shift: s, level: "LOW", issue: "No gas testing ticket holder in group", action: "Confirm GTA coverage from HSE or adjacent crew for confined space/hot work entries." });
             }
 
             named.forEach(e => {
-              if (/resume.*(to be provided|pending)/i.test(e.sum)) {
+              if (/resume.*(to be provided|pending|to be confirmed)/i.test(e.sum)) {
                 r.push({ group: g, shift: s, level: "MED", issue: `${e.name} — resume not yet received`, action: "Obtain and review resume before mobilisation to verify competency." });
               }
             });
           });
         });
+
+        // Grouped check: all crew members with <1 year shutdown experience (roll-up)
+        const lowExp = E.filter(e => !e.name.startsWith("TBC") && e.sy < 1 && e.ty > 0);
+        if (lowExp.length) {
+          const list = lowExp.map(e => `${e.name} (${e.group}, ${e.shift})`).join("; ");
+          r.push({
+            group: "Crew-wide",
+            shift: "All",
+            level: "MED",
+            issue: `${lowExp.length} crew member(s) with <1 year shutdown experience`,
+            action: `Pair each with an experienced worker for initial shifts; avoid isolated or critical-path tasks without direct oversight. Affected: ${list}.`
+          });
+        }
+
+        // Telehandler ticket check removed — dedicated Tele drivers rostered on each shift.
 
         return r.sort((a, b) => ({ HIGH: 0, MED: 1, LOW: 2 })[a.level] - ({ HIGH: 0, MED: 1, LOW: 2 })[b.level]);
       }, []);
